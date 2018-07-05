@@ -24,7 +24,7 @@
     "enableTranslation": false,
     "applicationType": "microservice",
     "testFrameworks": [],
-    "simPrefix": "jhi",
+    "simPrefix": "sim",
     "clientPackageManager": "yarn",
     "skipClient": true,
     "skipUserManagement": true

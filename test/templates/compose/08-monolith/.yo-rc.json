@@ -22,7 +22,7 @@
     "simlifeVersion": "3.8.0",
     "serverPort": "8080",
     "messageBroker": false,
-    "simPrefix": "jhi",
+    "simPrefix": "sim",
     "languages": []
   }
 }

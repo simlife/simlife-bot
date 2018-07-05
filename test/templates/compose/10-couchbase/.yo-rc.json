@@ -18,7 +18,7 @@
     "testFrameworks": [
       "gatling"
     ],
-    "simPrefix": "jhi",
+    "simPrefix": "sim",
     "skipClient": true,
     "skipUserManagement": true,
     "nativeLanguage": "en",

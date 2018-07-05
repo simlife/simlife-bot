@@ -26,7 +26,7 @@
     "skipClient": true,
     "skipUserManagement": true,
     "serverPort": "8081",
-    "simPrefix": "jhi",
+    "simPrefix": "sim",
     "travis": true,
     "websocket": false,
     "messageBroker": false,

@@ -21,7 +21,7 @@
         "testFrameworks": [
             "gatling"
         ],
-        "simPrefix": "jhi",
+        "simPrefix": "sim",
         "enableTranslation": true,
         "nativeLanguage": "en",
         "languages": [

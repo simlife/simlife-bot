@@ -26,7 +26,7 @@
         "gatling",
         "protractor"
       ],
-      "simPrefix": "jhi",
+      "simPrefix": "sim",
       "travis": true,
       "enableTranslation": true,
       "nativeLanguage": "en",

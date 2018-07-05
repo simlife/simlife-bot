@@ -21,7 +21,7 @@
       "protractor"
     ],
     "serverPort": "8080",
-    "simPrefix": "jhi",
+    "simPrefix": "sim",
     "travis": true,
     "messageBroker": false,
     "serviceDiscoveryType": false,
