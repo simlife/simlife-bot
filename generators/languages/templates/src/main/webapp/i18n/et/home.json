@@ -1,0 +1,19 @@
+{
+    "home": {
+        "title": "Tere tulemast, Simlife Bot!",
+        "subtitle": "See on teie avaleht",
+        "logged": {
+            "message": "Olete sisse logitud kasutajana \"{{username}}\"."
+        },
+        "question": "Kui teil on küsimusi Simlife kohta:",
+        "link": {
+            "homepage": "Simlife koduleht",
+            "stackoverflow": "Simlife Stack Overflow-s",
+            "bugtracker": "Simlife veahaldus",
+            "chat": "Simlife avalik jututuba",
+            "follow": "jälgi @java_simlife Twitteris"
+        },
+        "like": "Kui teile meeldib Simlife, siis ärge unustage anda meile tähte",
+        "github": "GitHub-is"
+    }
+}

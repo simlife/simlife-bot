@@ -1,0 +1,19 @@
+{
+    "home": {
+        "title": "Bun venit, Simlife Bot!",
+        "subtitle": "Aceasta este pagina ta de start",
+        "logged": {
+            "message": "Ești autentificat cu numele de utilizator \"{{username}}\"."
+        },
+        "question": "Dacă ai orice întrebări în legatură cu Simlife:",
+        "link": {
+            "homepage": "Pagina Simlife",
+            "stackoverflow": "Simlife pe Stack Overflow",
+            "bugtracker": "Simlife bug tracker",
+            "chat": "Camera de chat publică pentru Simlife",
+            "follow": "Contactează @java_simlife pe Twitter"
+        },
+        "like": "Dacă iți place Simlife nu uita să ne dai o stea pe",
+        "github": "GitHub"
+    }
+}

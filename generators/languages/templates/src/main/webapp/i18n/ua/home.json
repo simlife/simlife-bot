@@ -1,0 +1,19 @@
+{
+    "home": {
+        "title": "Ласкаво просимо, Java simlife!",
+        "subtitle": "Це ваша домашня сторінка",
+        "logged": {
+            "message": "Ви ввійшли як користувач \"{{username}}\"."
+        },
+        "question": "Якщо у вас виникли питання по Simlife:",
+        "link": {
+            "homepage": "Домашня сторінка Simlife",
+            "stackoverflow": "Simlife на Stack Overflow",
+            "bugtracker": "Баг трекер Simlife",
+            "chat": "Публічна чат кімната Simlife ",
+            "follow": "Користувач @java_simlife в Twitter"
+        },
+        "like": "Якщо вам подобається Simlife, не забудьте дати нам зірку на",
+        "github": "GitHub"
+    }
+}

@@ -1,2 +1,0 @@
-# simlife-bot
-simlife-bot

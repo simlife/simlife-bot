@@ -1,0 +1,19 @@
+{
+    "home": {
+        "title": "Vítejte, Simlife Bot!",
+        "subtitle": "Toto je vaše domovská stránka",
+        "logged": {
+            "message": "Jste přihlášen jako \"{{username}}\"."
+        },
+        "question": "Pokud máte nějaké dotazy týkající se Simlife:",
+        "link": {
+            "homepage": "Domovská stránka Simlife",
+            "stackoverflow": "Simlife ve službě Stack Overflow",
+            "bugtracker": "Nahlašování chyb Simlife",
+            "chat": "Veřejná chatovací místnost Simlife",
+            "follow": "Sledovat @java_simlife ve službě Twitter"
+        },
+        "like": "Pokud se vám Simlife líbí, nezapomeňte nám dát hvězdičku ve službě",
+        "github": "GitHub"
+    }
+}

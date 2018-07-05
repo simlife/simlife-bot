@@ -1,0 +1,4 @@
+SimLife Bot
+
+${AnsiColor.BRIGHT_BLUE}:: Simlife 🤓  :: Running Spring Boot ${spring-boot.version} ::
+:: https://www.simlife.io ::${AnsiColor.DEFAULT}

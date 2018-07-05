@@ -1,0 +1,19 @@
+{
+    "home": {
+        "title": "Բարի գալուստ, Simlife Bot!",
+        "subtitle": "Սա Ձեր գլխավոր էջն է",
+        "logged": {
+            "message": "Դուք մուտք եք գործել որպես օգտվող \"{{username}}\"."
+        },
+        "question": "Եթե Ձեզ մոտ առաջացել են հարցեր Simlife:",
+        "link": {
+            "homepage": "Simlife գլխավոր էջ",
+            "stackoverflow": "Simlife on Stack Overflow",
+            "bugtracker": "Simlife bug tracker",
+            "chat": "Simlife public chat room",
+            "follow": "follow @java_simlife on Twitter"
+        },
+        "like": "Եթե Ձեզ դուր է գալիս Simlife, մի մոռացեք տալ Մեզ աստղ",
+        "github": "GitHub"
+    }
+}

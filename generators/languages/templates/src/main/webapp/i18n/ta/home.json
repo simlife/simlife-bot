@@ -1,0 +1,19 @@
+{
+    "home": {
+        "title": "வரவேற்கிறோம் , ஜாவா Hipster !",
+        "subtitle": "இது உங்கள் முகப்புப்பக்கம்",
+        "logged": {
+            "message": "நீங்கள் பயனர் என பதிவு \"{{username}}\"."
+        },
+        "question": "Simlife மீது ஏதேனும் கேள்விகள் இருந்தால்:",
+        "link": {
+            "homepage": "Simlife முகப்புப்பக்கம்",
+            "stackoverflow": "Simlife யின் Stack Overflow",
+            "bugtracker": "Simlife யின் bug tracker",
+            "chat": "Simlife யின் பொது பேச்சுயறை",
+            "follow": "தொடர்பு @java_simlife யின் Twitter"
+        },
+        "like": "Simlife-யை விரும்பினால்,நட்சத்திரம் கொடுக்க மறக்க வேண்டாம்",
+        "github": "GitHub"
+    }
+}

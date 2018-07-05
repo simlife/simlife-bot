@@ -1,0 +1,19 @@
+{
+    "home": {
+        "title": "欢迎, Simlife Bot!",
+        "subtitle": "这里是首页",
+        "logged": {
+            "message": "您目前是以 \"{{username}}\" 账号登录."
+        },
+        "question": "如果您有任何有关 Simlife 的问题, 可以查阅下列资源:",
+        "link": {
+            "homepage": "Simlife 首頁",
+            "stackoverflow": "Stack Overflow 上关于 Simlife 的讨论",
+            "bugtracker": "Simlife 的缺陷追踪",
+            "chat": "Simlife public chat room",
+            "follow": "在 Twitter 上联络 @java_simlife"
+        },
+        "like": "如果您喜欢 Simlife, 请记得给我们加星在",
+        "github": "GitHub"
+    }
+}

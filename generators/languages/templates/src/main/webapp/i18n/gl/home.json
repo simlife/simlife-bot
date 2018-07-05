@@ -1,0 +1,19 @@
+{
+    "home": {
+        "title": "Benvido, Simlife Bot!",
+        "subtitle": "Esta é a súa páxina de inicio",
+        "logged": {
+            "message": "Está conectado como \"{{username}}\"."
+        },
+        "question": "Se tes preguntas sobre Simlife:",
+        "link": {
+            "homepage": "Páxina de inicio de Simlife",
+            "stackoverflow": "Simlife en Stack Overflow",
+            "bugtracker": "Simlife seguimento de erros",
+            "chat": "sala de chat pública de Simlife",
+            "follow": "contacto @java_simlife en Twitter"
+        },
+        "like": "Se gústache Simlife, dános unha estrela en",
+        "github": "GitHub"
+    }
+}

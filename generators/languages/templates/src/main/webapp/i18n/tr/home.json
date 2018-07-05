@@ -1,0 +1,19 @@
+{
+    "home": {
+        "title": "Merhaba, Simlife Bot!",
+        "subtitle": "Burası Ana Sayfanız",
+        "logged": {
+            "message": "\"{{username}}\" olarak giriş yaptınız."
+        },
+        "question": "Simlife hakkında sorularınız için:",
+        "link": {
+            "homepage": "Simlife ana sayfa",
+            "stackoverflow": "Stack Overflow'da Simlife",
+            "bugtracker": "Simlife hata yönetimi",
+            "chat": "Simlife genel sohbet odası",
+            "follow": "Twitter'da @java_simlife adresinden ulaşabilirsiniz"
+        },
+        "like": "Simlife'ı beğendiysenizi yıldız vermeyi unutmayın",
+        "github": "GitHub"
+    }
+}

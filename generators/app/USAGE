@@ -1,0 +1,7 @@
+Description:
+    Creates a new Simlife application based on the selected options
+
+Example:
+    simlife
+
+    This will compose simlife:client, simlife:server and simlife:languages to scaffold a full application

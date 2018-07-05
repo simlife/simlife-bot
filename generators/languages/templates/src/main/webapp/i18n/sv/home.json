@@ -1,0 +1,19 @@
+{
+    "home": {
+        "title": "Välkommen Simlife Bot!",
+        "subtitle": "Det här är din hemsida",
+        "logged": {
+            "message": "Du är inloggad som \"{{username}}\"."
+        },
+        "question": "Om du har några frågor om Simlife:",
+        "link": {
+            "homepage": "Simlifes hemsida",
+            "stackoverflow": "Simlife på Stack Overflow",
+            "bugtracker": "Simlife bughanterare",
+            "chat": "Simlife public chat room",
+            "follow": "kontakta @java_simlife på Twitter"
+        },
+        "like": "Om du gillar Simlife, glöm inte att ge oss en stjärna på",
+        "github": "GitHub"
+    }
+}

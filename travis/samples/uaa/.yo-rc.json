@@ -1,0 +1,33 @@
+{
+  "simlife-bot": {
+    "baseName": "travisUaa",
+    "packageName": "io.github.simlife.travis",
+    "packageFolder": "io/github/simlife/travis",
+    "serverPort": "9999",
+    "authenticationType": "uaa",
+    "cacheProvider": "hazelcast",
+    "enableHibernateCache": true,
+    "websocket": false,
+    "databaseType": "sql",
+    "devDatabaseType": "h2Disk",
+    "prodDatabaseType": "mysql",
+    "searchEngine": false,
+    "messageBroker": false,
+    "serviceDiscoveryType": "eureka",
+    "buildTool": "maven",
+    "enableTranslation": true,
+    "applicationType": "uaa",
+    "testFrameworks": [
+      "gatling"
+    ],
+    "simPrefix": "jhi",
+    "skipClient": true,
+    "nativeLanguage": "en",
+    "languages": [
+      "en"
+    ],
+    "travis": true,
+    "clientFramework": "angularX",
+    "clientPackageManager": "yarn"
+  }
+}

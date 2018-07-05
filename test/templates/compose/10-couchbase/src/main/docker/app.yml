@@ -1,0 +1,17 @@
+version: '2'
+services:
+    mscouchbase-app:
+        image: mscouchbase
+        environment:
+            - SPRING_PROFILES_ACTIVE=prod
+            - SPRING_CLOUD_CONFIG_URI=http://admin:admin@simlife-registry:8761/config
+            - SPRING_COUCHBASE_BOOTSTRAP_HOSTS=mscouchbase-couchbase
+            - SPRING_COUCHBASE_BUCKET_NAME=mscouchbase
+    mscouchbase-couchbase:
+        extends:
+            file: couchbase.yml
+            service: mscouchbase-couchbase
+    simlife-registry:
+        extends:
+            file: simlife-registry.yml
+            service: simlife-registry

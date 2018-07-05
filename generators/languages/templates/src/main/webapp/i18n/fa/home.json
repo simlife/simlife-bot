@@ -1,0 +1,19 @@
+{
+    "home": {
+        "title": "خوش آمدید, Simlife Bot!",
+        "subtitle": "این صفحه اصلی شماست",
+        "logged": {
+            "message": "شما وارد شدید با کاربر \"{{username}}\"."
+        },
+        "question": "اگر سوالی دارید؟ در مورد Simlife:",
+        "link": {
+            "homepage": "Simlife صفحه اصلی",
+            "stackoverflow": "Simlife در Stack Overflow",
+            "bugtracker": "Simlife bug tracker",
+            "chat": "Simlife public chat room",
+            "follow": "دنبال کنید @java_simlife در Twitter"
+        },
+        "like": "اگر Simlife را دوست دارید، فراموش نکنید بهش ستاره بدید در",
+        "github": "GitHub"
+    }
+}

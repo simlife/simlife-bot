@@ -1,0 +1,36 @@
+{
+  "simlife-bot": {
+    "applicationType": "monolith",
+    "baseName": "travisCassandra",
+    "packageName": "io.github.simlife.travis",
+    "packageFolder": "io/github/simlife/travis",
+    "authenticationType": "session",
+    "cacheProvider": "no",
+    "enableHibernateCache": false,
+    "websocket": false,
+    "databaseType": "cassandra",
+    "devDatabaseType": "cassandra",
+    "prodDatabaseType": "cassandra",
+    "reactive": true,
+    "searchEngine": false,
+    "useSass": false,
+    "buildTool": "maven",
+    "enableTranslation": true,
+    "nativeLanguage": "fr",
+    "languages": [
+      "en",
+      "fr"
+    ],
+    "rememberMeKey": "f19f0827c622eb9b81f5227a869ccd44932d78eb",
+    "testFrameworks": [
+      "gatling"
+    ],
+    "serverPort": "8080",
+    "simPrefix": "jhi",
+    "travis": true,
+    "messageBroker": false,
+    "serviceDiscoveryType": false,
+    "clientPackageManager": "yarn",
+    "clientFramework": "angularX"
+  }
+}

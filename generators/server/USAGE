@@ -1,0 +1,7 @@
+Description:
+    Creates a new Simlife server side application based on the selected options
+
+Example:
+    simlife server
+
+    This will create a Spring Boot server side app

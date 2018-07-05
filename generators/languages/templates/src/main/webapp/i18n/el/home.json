@@ -1,0 +1,19 @@
+{
+    "home": {
+        "title": "Καλός όρισες, Simlife Bot!",
+        "subtitle": "Αυτή είναι η αρχική σου σελίδα",
+        "logged": {
+            "message": "Είστε συνδεμένος με τον χρηστη \"{{username}}\"."
+        },
+        "question": "Αν έχετε ερωτήσεις σχετικά με το Simlife:",
+        "link": {
+            "homepage": "Αρχική σελίδα του Simlife",
+            "stackoverflow": "Το Simlife στο Stack Overflow",
+            "bugtracker": "Simlife bug tracker",
+            "chat": "Simlife chat room για το κοινό",
+            "follow": "Ακολουθείστε @java_simlife στο Twitter"
+        },
+        "like": "Άμα σας αρέσει το Simlife, μην ξεχάσετε να μας δώσετε ένα αστέρι",
+        "github": "GitHub"
+    }
+}

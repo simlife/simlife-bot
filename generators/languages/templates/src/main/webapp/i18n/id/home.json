@@ -1,0 +1,19 @@
+{
+    "home": {
+        "title": "Selamat Datang, Simlife Bot!",
+        "subtitle": "Ini adalah halaman utama anda",
+        "logged": {
+            "message": "Anda login sebagai \"{{username}}\"."
+        },
+        "question": "Jika anda punya pertanyaan tentang Simlife:",
+        "link": {
+            "homepage": "Simlife homepage",
+            "stackoverflow": "Simlife on Stack Overflow",
+            "bugtracker": "Simlife bug tracker",
+            "chat": "Simlife public chat room",
+            "follow": "follow @java_simlife on Twitter"
+        },
+        "like": "Jika anda menyukai Simlife, jangan lupa beri kami rating",
+        "github": "GitHub"
+    }
+}

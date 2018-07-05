@@ -1,0 +1,19 @@
+{
+    "home": {
+        "title": "Simlife Botga, hush kelibsiz!",
+        "subtitle": "Bosh sahifa",
+        "logged": {
+            "message": "Siz \"{{username}}\" foydalanuvchisi sifatida kirdiz."
+        },
+        "question": "Simlife bo`yicha savollaringiz bo`lsa:",
+        "link": {
+            "homepage": "Simlife bosh sahifasi",
+            "stackoverflow": "Simlife Stack Overflow",
+            "bugtracker": "Simlife bag trekeri",
+            "chat": "Simlife umumiy chat xonasi",
+            "follow": "Twitterdagi logini @java_simlife"
+        },
+        "like": "Agar Simlife sizga yoqsa, ushbu manzilda yulduzcha quyishni ununmang",
+        "github": "GitHub"
+    }
+}

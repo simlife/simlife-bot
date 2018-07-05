@@ -1,0 +1,19 @@
+{
+    "home": {
+        "title": "Dobrodošli, Simlife Botu!",
+        "subtitle": "Ovo je Vaša početna stranica",
+        "logged": {
+            "message": "Prijavljeni ste kao korisnik \"{{username}}\"."
+        },
+        "question": "Ako imate bilo kakva pitanja o Simlife-u:",
+        "link": {
+            "homepage": "Simlife početna stranica",
+            "stackoverflow": "Simlife na Stack Overflow",
+            "bugtracker": "Simlife tragač za greškama",
+            "chat": "Simlife javni čet",
+            "follow": "pratite @java_simlife na Twitter-u"
+        },
+        "like": "Ako Vam se dopada Simlife, ne zaboravite da nam date zvezdicu na",
+        "github": "GitHub-u"
+    }
+}

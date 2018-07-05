@@ -1,0 +1,7 @@
+Description:
+    Creates a new Simlife client side application based on the selected options
+
+Example:
+    simlife client
+
+    This will create a client app

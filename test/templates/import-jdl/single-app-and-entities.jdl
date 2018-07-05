@@ -1,0 +1,10 @@
+application {
+  config {
+    baseName simlifeApp,
+    packageName com.simlife.myapp
+  }
+  entities A, B
+}
+
+entity A
+entity B

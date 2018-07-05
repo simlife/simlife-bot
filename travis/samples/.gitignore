@@ -1,0 +1,4 @@
+*/*
+!*/.yo-rc.json
+!.simlife/*
+*-sample/.yo-rc.json

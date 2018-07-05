@@ -1,0 +1,19 @@
+{
+    "home": {
+        "title": "ようこそ, Simlife Bot!",
+        "subtitle": "ここはトップページです。",
+        "logged": {
+            "message": "\"{{username}}\"としてログインしています。"
+        },
+        "question": "Simlifeに関して質問があれば:",
+        "link": {
+            "homepage": "Simlifeのサイト",
+            "stackoverflow": "Stack Overflow のSimlife",
+            "bugtracker": "Simlifeのバグトラッカー",
+            "chat": "Simlife public chat room",
+            "follow": "Twitterの @java_simlife"
+        },
+        "like": "Simlifeを気に入ったら、是非スターをつけてください。",
+        "github": "GitHub"
+    }
+}
