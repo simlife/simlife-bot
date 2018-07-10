@@ -6,9 +6,6 @@ module.exports = {
     aws: {
         desc: 'Deploy the current application to Amazon Web Services'
     },
-    'aws-containers': {
-        desc: 'Deploy the current application to Amazon Web Services using ECS'
-    },
     'ci-cd': {
         desc: 'Create pipeline scripts for popular Continuous Integration/Continuous Deployment tools'
     },
@@ -28,9 +25,6 @@ module.exports = {
     'export-jdl': {
         argument: ['jdlFile'],
         desc: 'Create a JDL file from the existing entities'
-    },
-    gae: {
-        desc: 'Deploy the current application to Google App Engine'
     },
     heroku: {
         desc: 'Deploy the current application to Heroku'

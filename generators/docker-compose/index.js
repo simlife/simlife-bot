@@ -1,7 +1,7 @@
 /**
- * Copyright 2018 the original author or authors from the Simlife project.
+ * Copyright 2013-2018 the original author or authors from the Simlife project.
  *
- * This file is part of the Simlife project, see https://www.simlife.io/
+ * This file is part of the Simlife project, see http://www.simlife.tech/
  * for more information.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -28,16 +28,6 @@ const docker = require('../docker-base');
 const constants = require('../generator-constants');
 
 module.exports = class extends BaseGenerator {
-    constructor(args, opts) {
-        super(args, opts);
-        // This adds support for a `--skip-checks` flag
-        this.option('skip-checks', {
-            desc: 'Check the status of the required tools',
-            type: Boolean,
-            defaults: false
-        });
-    }
-
     get initializing() {
         return {
             sayHello() {
@@ -69,22 +59,20 @@ module.exports = class extends BaseGenerator {
             checkDocker: docker.checkDocker,
 
             checkDockerCompose() {
-                if (this.options['skip-checks']) return;
-
                 const done = this.async();
 
                 shelljs.exec('docker-compose -v', { silent: true }, (code, stdout, stderr) => {
                     if (stderr) {
-                        this.log(chalk.red('Docker Compose 1.6.0 or later is not installed on your computer.\n'
-                            + '         Read https://docs.docker.com/compose/install/\n'));
+                        this.log(chalk.red('Docker Compose 1.6.0 or later is not installed on your computer.\n' +
+                            '         Read https://docs.docker.com/compose/install/\n'));
                     } else {
                         const composeVersion = stdout.split(' ')[2].replace(/,/g, '');
                         const composeVersionMajor = composeVersion.split('.')[0];
                         const composeVersionMinor = composeVersion.split('.')[1];
                         if (composeVersionMajor < 1 || (composeVersionMajor === 1 && composeVersionMinor < 6)) {
-                            this.log(chalk.red(`${'Docker Compose version 1.6.0 or later is not installed on your computer.\n'
-                                + '         Docker Compose version found: '}${composeVersion}\n`
-                                + '         Read https://docs.docker.com/compose/install/\n'));
+                            this.log(chalk.red(`${'Docker Compose version 1.6.0 or later is not installed on your computer.\n' +
+                                '         Docker Compose version found: '}${composeVersion}\n` +
+                                '         Read https://docs.docker.com/compose/install/\n'));
                         }
                     }
                     done();
@@ -100,7 +88,6 @@ module.exports = class extends BaseGenerator {
                 this.monitoring = this.config.get('monitoring');
                 this.consoleOptions = this.config.get('consoleOptions');
                 this.useKafka = false;
-                this.useMemcached = false;
                 this.serviceDiscoveryType = this.config.get('serviceDiscoveryType');
                 if (this.serviceDiscoveryType === undefined) {
                     this.serviceDiscoveryType = 'eureka';
@@ -243,15 +230,6 @@ module.exports = class extends BaseGenerator {
                     if (messageBroker === 'kafka') {
                         this.useKafka = true;
                     }
-                    // Add Memcached support
-                    const cacheProvider = appConfig.cacheProvider;
-                    if (cacheProvider === 'memcached') {
-                        this.useMemcached = true;
-                        const memcachedYaml = jsyaml.load(this.fs.read(`${path}/src/main/docker/memcached.yml`));
-                        const memcachedConfig = memcachedYaml.services[`${lowercaseBaseName}-memcached`];
-                        delete memcachedConfig.ports;
-                        parentConfiguration[`${lowercaseBaseName}-memcached`] = memcachedConfig;
-                    }
                     // Expose authenticationType
                     this.authenticationType = appConfig.authenticationType;
 
@@ -272,17 +250,15 @@ module.exports = class extends BaseGenerator {
             },
 
             saveConfig() {
-                this.config.set({
-                    appsFolders: this.appsFolders,
-                    directoryPath: this.directoryPath,
-                    gatewayType: this.gatewayType,
-                    clusteredDbApps: this.clusteredDbApps,
-                    monitoring: this.monitoring,
-                    consoleOptions: this.consoleOptions,
-                    serviceDiscoveryType: this.serviceDiscoveryType,
-                    adminPassword: this.adminPassword,
-                    jwtSecretKey: this.jwtSecretKey
-                });
+                this.config.set('appsFolders', this.appsFolders);
+                this.config.set('directoryPath', this.directoryPath);
+                this.config.set('gatewayType', this.gatewayType);
+                this.config.set('clusteredDbApps', this.clusteredDbApps);
+                this.config.set('monitoring', this.monitoring);
+                this.config.set('consoleOptions', this.consoleOptions);
+                this.config.set('serviceDiscoveryType', this.serviceDiscoveryType);
+                this.config.set('adminPassword', this.adminPassword);
+                this.config.set('jwtSecretKey', this.jwtSecretKey);
             }
         };
     }

@@ -35,7 +35,6 @@ describe('Simlife Docker Compose Sub Generator', () => {
                 .inTmpDir((dir) => {
                     fse.copySync(path.join(__dirname, './templates/compose/'), dir);
                 })
-                .withOptions({ skipChecks: true })
                 .withPrompts({
                     composeApplicationType: 'microservice',
                     directoryPath: './',
@@ -67,7 +66,6 @@ describe('Simlife Docker Compose Sub Generator', () => {
                 .inTmpDir((dir) => {
                     fse.copySync(path.join(__dirname, './templates/compose/'), dir);
                 })
-                .withOptions({ skipChecks: true })
                 .withPrompts({
                     composeApplicationType: 'microservice',
                     directoryPath: './',
@@ -92,33 +90,6 @@ describe('Simlife Docker Compose Sub Generator', () => {
         });
     });
 
-    describe('one microservice and a directory path without a trailing slash', () => {
-        beforeEach((done) => {
-            helpers
-                .run(require.resolve('../generators/docker-compose'))
-                .inTmpDir((dir) => {
-                    fse.copySync(path.join(__dirname, './templates/compose/'), dir);
-                })
-                .withOptions({ skipChecks: true })
-                .withPrompts({
-                    composeApplicationType: 'microservice',
-                    directoryPath: '.',
-                    chosenApps: [
-                        '02-mysql'
-                    ],
-                    clusteredDbApps: [],
-                    monitoring: 'no'
-                })
-                .on('end', done);
-        });
-        it('creates expected default files', () => {
-            assert.file(expectedFiles.dockercompose);
-        });
-        it('Correct the directory path by appending a trailing slash', () => {
-            assert.fileContent('.yo-rc.json', '"directoryPath": "./"');
-        });
-    });
-
     describe('gateway and one microservice', () => {
         beforeEach((done) => {
             helpers
@@ -126,7 +97,6 @@ describe('Simlife Docker Compose Sub Generator', () => {
                 .inTmpDir((dir) => {
                     fse.copySync(path.join(__dirname, './templates/compose/'), dir);
                 })
-                .withOptions({ skipChecks: true })
                 .withPrompts({
                     composeApplicationType: 'microservice',
                     directoryPath: './',
@@ -159,7 +129,6 @@ describe('Simlife Docker Compose Sub Generator', () => {
                 .inTmpDir((dir) => {
                     fse.copySync(path.join(__dirname, './templates/compose/'), dir);
                 })
-                .withOptions({ skipChecks: true })
                 .withPrompts({
                     composeApplicationType: 'microservice',
                     directoryPath: './',
@@ -202,7 +171,6 @@ describe('Simlife Docker Compose Sub Generator', () => {
                 .inTmpDir((dir) => {
                     fse.copySync(path.join(__dirname, './templates/compose/'), dir);
                 })
-                .withOptions({ skipChecks: true })
                 .withPrompts({
                     composeApplicationType: 'microservice',
                     directoryPath: './',
@@ -248,7 +216,6 @@ describe('Simlife Docker Compose Sub Generator', () => {
                 .inTmpDir((dir) => {
                     fse.copySync(path.join(__dirname, './templates/compose/'), dir);
                 })
-                .withOptions({ skipChecks: true })
                 .withPrompts({
                     composeApplicationType: 'microservice',
                     directoryPath: './',
@@ -294,7 +261,6 @@ describe('Simlife Docker Compose Sub Generator', () => {
                 .inTmpDir((dir) => {
                     fse.copySync(path.join(__dirname, './templates/compose/'), dir);
                 })
-                .withOptions({ skipChecks: true })
                 .withPrompts({
                     composeApplicationType: 'microservice',
                     directoryPath: './',
@@ -341,7 +307,6 @@ describe('Simlife Docker Compose Sub Generator', () => {
                 .inTmpDir((dir) => {
                     fse.copySync(path.join(__dirname, './templates/compose/'), dir);
                 })
-                .withOptions({ skipChecks: true })
                 .withPrompts({
                     composeApplicationType: 'microservice',
                     directoryPath: './',
@@ -377,7 +342,6 @@ describe('Simlife Docker Compose Sub Generator', () => {
                 .inTmpDir((dir) => {
                     fse.copySync(path.join(__dirname, './templates/compose/'), dir);
                 })
-                .withOptions({ skipChecks: true })
                 .withOptions({ force: true })
                 .withPrompts({
                     composeApplicationType: 'microservice',
@@ -415,7 +379,6 @@ describe('Simlife Docker Compose Sub Generator', () => {
                 .inTmpDir((dir) => {
                     fse.copySync(path.join(__dirname, './templates/compose/'), dir);
                 })
-                .withOptions({ skipChecks: true })
                 .withPrompts({
                     composeApplicationType: 'microservice',
                     directoryPath: './',
@@ -454,7 +417,6 @@ describe('Simlife Docker Compose Sub Generator', () => {
                 .inTmpDir((dir) => {
                     fse.copySync(path.join(__dirname, './templates/compose/'), dir);
                 })
-                .withOptions({ skipChecks: true })
                 .withPrompts({
                     composeApplicationType: 'microservice',
                     directoryPath: './',
@@ -494,7 +456,6 @@ describe('Simlife Docker Compose Sub Generator', () => {
                 .inTmpDir((dir) => {
                     fse.copySync(path.join(__dirname, './templates/compose/'), dir);
                 })
-                .withOptions({ skipChecks: true })
                 .withPrompts({
                     composeApplicationType: 'microservice',
                     directoryPath: './',
@@ -530,7 +491,6 @@ describe('Simlife Docker Compose Sub Generator', () => {
                 .inTmpDir((dir) => {
                     fse.copySync(path.join(__dirname, './templates/compose/'), dir);
                 })
-                .withOptions({ skipChecks: true })
                 .withPrompts({
                     composeApplicationType: 'monolith',
                     directoryPath: './',
@@ -559,7 +519,6 @@ describe('Simlife Docker Compose Sub Generator', () => {
                 .inTmpDir((dir) => {
                     fse.copySync(path.join(__dirname, './templates/compose/'), dir);
                 })
-                .withOptions({ skipChecks: true })
                 .withPrompts({
                     composeApplicationType: 'microservice',
                     directoryPath: './',
@@ -598,7 +557,6 @@ describe('Simlife Docker Compose Sub Generator', () => {
                 .inTmpDir((dir) => {
                     fse.copySync(path.join(__dirname, './templates/compose/'), dir);
                 })
-                .withOptions({ skipChecks: true })
                 .withPrompts({
                     composeApplicationType: 'microservice',
                     directoryPath: './',

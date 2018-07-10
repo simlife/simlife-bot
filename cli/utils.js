@@ -1,7 +1,7 @@
 /**
- * Copyright 2018 the original author or authors from the Simlife project.
+ * Copyright 2013-2018 the original author or authors from the Simlife project.
  *
- * This file is part of the Simlife project, see https://www.simlife.io/
+ * This file is part of the Simlife project, see http://www.simlife.tech/
  * for more information.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -74,7 +74,7 @@ const toString = (item) => {
 const initHelp = (program, cliName) => {
     program.on('--help', () => {
         logger.debug('Adding additional help info');
-        logger.info(`  For more info visit ${chalk.blue('https://www.simlife.io')}`);
+        logger.info(`  For more info visit ${chalk.blue('http://www.simlife.tech')}`);
         logger.info('');
     });
 

@@ -1,7 +1,7 @@
 /**
- * Copyright 2018 the original author or authors from the Simlife project.
+ * Copyright 2013-2018 the original author or authors from the Simlife project.
  *
- * This file is part of the Simlife project, see https://www.simlife.io/
+ * This file is part of the Simlife project, see http://www.simlife.tech/
  * for more information.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -30,8 +30,7 @@ module.exports = {
     askForServiceDiscovery,
     askForAdminPassword,
     askForDockerRepositoryName,
-    askForDockerPushCommand,
-    loadConfigs
+    askForDockerPushCommand
 };
 
 /**
@@ -129,11 +128,6 @@ function askForPath() {
 
     this.prompt(prompts).then((props) => {
         this.directoryPath = props.directoryPath;
-        // Patch the path if there is no trailing "/"
-        if (!this.directoryPath.endsWith('/')) {
-            this.log(chalk.yellow(`The path "${this.directoryPath}" does not end with a trailing "/", adding it anyway.`));
-            this.directoryPath += '/';
-        }
 
         this.appsFolders = getAppFolders.call(this, this.directoryPath, composeApplicationType);
 
@@ -149,7 +143,6 @@ function askForPath() {
         done();
     });
 }
-
 
 /**
  * Ask For Apps
@@ -172,38 +165,29 @@ function askForApps() {
     this.prompt(prompts).then((props) => {
         this.appsFolders = props.chosenApps;
 
-        loadConfigs.call(this);
+        this.appConfigs = [];
+        this.gatewayNb = 0;
+        this.monolithicNb = 0;
+        this.microserviceNb = 0;
+
+        // Loading configs
+        this.appsFolders.forEach((appFolder) => {
+            const path = this.destinationPath(`${this.directoryPath + appFolder}/.yo-rc.json`);
+            const fileData = this.fs.readJSON(path);
+            const config = fileData['simlife-bot'];
+
+            if (config.applicationType === 'monolith') {
+                this.monolithicNb++;
+            } else if (config.applicationType === 'gateway') {
+                this.gatewayNb++;
+            } else if (config.applicationType === 'microservice') {
+                this.microserviceNb++;
+            }
+
+            this.portsToBind = this.monolithicNb + this.gatewayNb;
+            this.appConfigs.push(config);
+        });
         done();
-    });
-}
-
-/*
- * Load config from this.appFolders
- * TODO: Extracted from AdForApps. Move into utils?
- */
-function loadConfigs() {
-    this.appConfigs = [];
-    this.gatewayNb = 0;
-    this.monolithicNb = 0;
-    this.microserviceNb = 0;
-
-    // Loading configs
-    this.appsFolders.forEach((appFolder) => {
-        const path = this.destinationPath(`${this.directoryPath + appFolder}/.yo-rc.json`);
-        const fileData = this.fs.readJSON(path);
-        const config = fileData['simlife-bot'];
-
-        if (config.applicationType === 'monolith') {
-            this.monolithicNb++;
-        } else if (config.applicationType === 'gateway') {
-            this.gatewayNb++;
-        } else if (config.applicationType === 'microservice') {
-            this.microserviceNb++;
-        }
-
-        this.portsToBind = this.monolithicNb + this.gatewayNb;
-        config.appFolder = appFolder;
-        this.appConfigs.push(config);
     });
 }
 
@@ -269,7 +253,7 @@ function askForMonitoring() {
                 name: 'Yes, for metrics only with Prometheus (only compatible with Simlife >= v3.12)'
             }
         ],
-        default: this.monitoring ? this.monitoring : 'no'
+        default: 'no'
     }];
 
     this.prompt(prompts).then((props) => {
@@ -323,10 +307,7 @@ function askForServiceDiscovery() {
     const serviceDiscoveryEnabledApps = [];
     this.appConfigs.forEach((appConfig, index) => {
         if (appConfig.serviceDiscoveryType) {
-            serviceDiscoveryEnabledApps.push({
-                baseName: appConfig.baseName,
-                serviceDiscoveryType: appConfig.serviceDiscoveryType
-            });
+            serviceDiscoveryEnabledApps.push({ baseName: appConfig.baseName, serviceDiscoveryType: appConfig.serviceDiscoveryType });
         }
     });
 

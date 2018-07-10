@@ -89,7 +89,7 @@ function createApplicationVersion(params, callback) {
         if (err) {
             callback(err, null);
         } else {
-            callback(null, { message: `Application version ${applicationName} created successfully` });
+            callback(null, { message: `Application version ${applicationName} created successful` });
         }
     });
 }
@@ -176,7 +176,7 @@ function createEnvironment(params, callback) {
 
         elasticbeanstalk.createEnvironment(environmentParams, (err) => {
             if (err) callback(err, null);
-            else callback(null, { message: `Environment ${environmentName} created successfully` });
+            else callback(null, { message: `Environment ${environmentName} created successful` });
         });
     });
 }

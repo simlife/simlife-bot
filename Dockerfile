@@ -1,4 +1,4 @@
-FROM ubuntu:bionic
+FROM ubuntu:xenial
 
 RUN \
   # configure the "simlife" user
@@ -6,9 +6,11 @@ RUN \
   useradd simlife -s /bin/bash -m -g simlife -G sudo && \
   echo 'simlife:simlife' |chpasswd && \
   mkdir /home/simlife/app && \
+
   # install open-jdk 8
   apt-get update && \
   apt-get install -y openjdk-8-jdk && \
+
   # install utilities
   apt-get install -y \
     wget \
@@ -20,55 +22,22 @@ RUN \
     fontconfig \
     python \
     g++ \
-    build-essential \
-  # dependencies required by puppeteer
-    gconf-service \
-    libasound2 \
-    libatk1.0-0 \
-    libc6 \
-    libcairo2 \
-    libcups2 \
-    libdbus-1-3 \
-    libexpat1 \
-    libfontconfig1 \
-    libgcc1 \
-    libgconf-2-4 \
-    libgdk-pixbuf2.0-0 \
-    libglib2.0-0 \
-    libgtk-3-0 \
-    libnspr4 \
-    libpango-1.0-0 \
-    libpangocairo-1.0-0 \
-    libstdc++6 \
-    libx11-6 \
-    libx11-xcb1 \
-    libxcb1 \
-    libxcomposite1 \
-    libxcursor1 \
-    libxdamage1 \
-    libxext6 \
-    libxfixes3 \
-    libxi6 \
-    libxrandr2 \
-    libxrender1 \
-    libxss1 \
-    libxtst6 \
-    ca-certificates \
-    fonts-liberation \
-    libappindicator1 \
-    libnss3 \
-    lsb-release \
-    xdg-utils && \
+    build-essential && \
+
   # install node.js
   curl -sL https://deb.nodesource.com/setup_8.x | bash && \
   apt-get install -y nodejs && \
+
   # upgrade npm
   npm install -g npm && \
+
   # install yarn
   npm install -g yarn && \
   su -c "yarn config set prefix /home/simlife/.yarn-global" simlife && \
-  # install yeoman
-  su -c "yarn global add yo" simlife && \
+
+  # install yeoman bower gulp
+  su -c "yarn global add yo bower gulp-cli" simlife && \
+
   # cleanup
   apt-get clean && \
   rm -rf \
@@ -85,12 +54,14 @@ RUN \
   chown -R simlife:simlife \
     /home/simlife \
     /usr/lib/node_modules && \
+
   # install simlife
   rm -Rf /home/simlife/simlife-bot/node_modules \
     /home/simlife/simlife-bot/yarn.lock \
     /home/simlife/simlife-bot/yarn-error.log && \
   su -c "cd /home/simlife/simlife-bot && yarn install" simlife && \
   su -c "yarn global add file:/home/simlife/simlife-bot" simlife && \
+
   # cleanup
   rm -rf \
     /home/simlife/.cache/ \

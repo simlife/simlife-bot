@@ -1,7 +1,7 @@
 /**
- * Copyright 2018 the original author or authors from the Simlife project.
+ * Copyright 2013-2018 the original author or authors from the Simlife project.
  *
- * This file is part of the Simlife project, see https://www.simlife.io/
+ * This file is part of the Simlife project, see http://www.simlife.tech/
  * for more information.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -69,7 +69,7 @@ function prompting() {
             message: 'Database password:',
             validate: (input) => {
                 if (input === '') return 'Please provide a password';
-                if (input.length < 8) return 'Password must contain minimum 8 chars';
+                else if (input.length < 8) return 'Password must contain minimum 8 chars';
                 return true;
             }
         },

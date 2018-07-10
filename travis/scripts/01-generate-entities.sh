@@ -49,29 +49,29 @@ elif [[ "$SIMLIFE" == *"micro"* ]]; then
     moveEntity FieldTestPaginationEntity
 
 elif [[ "$SIMLIFE" == *"react"* ]]; then
-    moveEntity BankAccount
-    moveEntity Label
-    moveEntity Operation
+    # moveEntity BankAccount
+    # moveEntity Label
+    # moveEntity Operation
 
     moveEntity FieldTestEntity
     moveEntity FieldTestMapstructEntity
     moveEntity FieldTestServiceClassEntity
     moveEntity FieldTestServiceImplEntity
-    moveEntity FieldTestInfiniteScrollEntity
-    moveEntity FieldTestPagerEntity
-    moveEntity FieldTestPaginationEntity
+    # moveEntity FieldTestInfiniteScrollEntity
+    # moveEntity FieldTestPagerEntity
+    # moveEntity FieldTestPaginationEntity
 
-    moveEntity EntityWithDTO
-    moveEntity EntityWithPagination
-    moveEntity EntityWithPaginationAndDTO
-    moveEntity EntityWithServiceClass
-    moveEntity EntityWithServiceClassAndDTO
-    moveEntity EntityWithServiceClassAndPagination
-    moveEntity EntityWithServiceClassPaginationAndDTO
-    moveEntity EntityWithServiceImpl
-    moveEntity EntityWithServiceImplAndDTO
-    moveEntity EntityWithServiceImplAndPagination
-    moveEntity EntityWithServiceImplPaginationAndDTO
+    # moveEntity EntityWithDTO
+    # moveEntity EntityWithPagination
+    # moveEntity EntityWithPaginationAndDTO
+    # moveEntity EntityWithServiceClass
+    # moveEntity EntityWithServiceClassAndDTO
+    # moveEntity EntityWithServiceClassAndPagination
+    # moveEntity EntityWithServiceClassPaginationAndDTO
+    # moveEntity EntityWithServiceImpl
+    # moveEntity EntityWithServiceImplAndDTO
+    # moveEntity EntityWithServiceImplAndPagination
+    # moveEntity EntityWithServiceImplPaginationAndDTO
 
 elif [[ "$SIMLIFE" == *"uaa"* ]]; then
     moveEntity FieldTestEntity
@@ -106,7 +106,6 @@ elif [[ ( "$SIMLIFE" == *"mysql"* ) || ( "$SIMLIFE" == *"psql"* ) ]]; then
     moveEntity TestPagination
     moveEntity TestManyToOne
     moveEntity TestManyToMany
-    moveEntity TestManyRelPaginDTO
     moveEntity TestOneToOne
     moveEntity TestCustomTableName
     moveEntity TestTwoRelationshipsSameEntity
@@ -122,6 +121,7 @@ elif [[ ( "$SIMLIFE" == *"mysql"* ) || ( "$SIMLIFE" == *"psql"* ) ]]; then
     moveEntity EntityWithServiceImplAndDTO
     moveEntity EntityWithServiceImplAndPagination
     moveEntity EntityWithServiceImplPaginationAndDTO
+
 else
     moveEntity BankAccount
     moveEntity Label

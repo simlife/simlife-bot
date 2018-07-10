@@ -1,7 +1,7 @@
 /**
- * Copyright 2018 the original author or authors from the Simlife project.
+ * Copyright 2013-2018 the original author or authors from the Simlife project.
  *
- * This file is part of the Simlife project, see https://www.simlife.io/
+ * This file is part of the Simlife project, see http://www.simlife.tech/
  * for more information.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -55,9 +55,9 @@ module.exports = class extends BaseGenerator {
 
                 shelljs.exec('oc version', { silent: true }, (code, stdout, stderr) => {
                     if (stderr) {
-                        this.log(`${chalk.yellow.bold('WARNING!')} oc 1.3 or later is not installed on your computer.\n`
-                          + 'Make sure you have OpenShift Origin / OpenShift Container Platform and CLI installed. Read'
-                            + ' https://github.com/openshift/origin/\n');
+                        this.log(`${chalk.yellow.bold('WARNING!')} oc 1.3 or later is not installed on your computer.\n` +
+                          'Make sure you have OpenShift Origin / OpenShift Container Platform and CLI installed. Read' +
+                            ' https://github.com/openshift/origin/\n');
                     }
                     done();
                 });
@@ -76,7 +76,6 @@ module.exports = class extends BaseGenerator {
                 this.openshiftNamespace = this.config.get('openshiftNamespace');
                 this.storageType = this.config.get('storageType');
                 this.registryReplicas = this.config.get('registryReplicas');
-                this.useKafka = false;
 
                 this.DOCKER_SIMLIFE_REGISTRY = constants.DOCKER_SIMLIFE_REGISTRY;
                 this.DOCKER_TRAEFIK = constants.DOCKER_TRAEFIK;
@@ -88,7 +87,6 @@ module.exports = class extends BaseGenerator {
                 this.DOCKER_ORACLE = constants.DOCKER_ORACLE;
                 this.DOCKER_MONGODB = constants.DOCKER_MONGODB;
                 this.DOCKER_COUCHBASE = constants.DOCKER_COUCHBASE;
-                this.DOCKER_MEMCACHED = constants.DOCKER_MEMCACHED;
                 this.DOCKER_ELASTICSEARCH = constants.DOCKER_ELASTICSEARCH;
                 this.DOCKER_KAFKA = constants.DOCKER_KAFKA;
                 this.DOCKER_ZOOKEEPER = constants.DOCKER_ZOOKEEPER;
@@ -164,30 +162,18 @@ module.exports = class extends BaseGenerator {
                 this.registryReplicas = 2;
             },
 
-            setPostPromptProp() {
-                this.appConfigs.some((element) => {
-                    if (element.messageBroker === 'kafka') {
-                        this.useKafka = true;
-                        return true;
-                    }
-                    return false;
-                });
-            },
-
             saveConfig() {
-                this.config.set({
-                    appsFolders: this.appsFolders,
-                    directoryPath: this.directoryPath,
-                    clusteredDbApps: this.clusteredDbApps,
-                    serviceDiscoveryType: this.serviceDiscoveryType,
-                    monitoring: this.monitoring,
-                    jwtSecretKey: this.jwtSecretKey,
-                    dockerRepositoryName: this.dockerRepositoryName,
-                    dockerPushCommand: this.dockerPushCommand,
-                    openshiftNamespace: this.openshiftNamespace,
-                    storageType: this.storageType,
-                    registryReplicas: this.registryReplicas
-                });
+                this.config.set('appsFolders', this.appsFolders);
+                this.config.set('directoryPath', this.directoryPath);
+                this.config.set('clusteredDbApps', this.clusteredDbApps);
+                this.config.set('serviceDiscoveryType', this.serviceDiscoveryType);
+                this.config.set('monitoring', this.monitoring);
+                this.config.set('jwtSecretKey', this.jwtSecretKey);
+                this.config.set('dockerRepositoryName', this.dockerRepositoryName);
+                this.config.set('dockerPushCommand', this.dockerPushCommand);
+                this.config.set('openshiftNamespace', this.openshiftNamespace);
+                this.config.set('storageType', this.storageType);
+                this.config.set('registryReplicas', this.registryReplicas);
             }
         };
     }
@@ -215,36 +201,17 @@ module.exports = class extends BaseGenerator {
         }
 
         this.log('\nYou can deploy all your apps by running: ');
-        this.log(`  ${chalk.cyan(`${this.directoryPath}ocp/ocp-apply.sh`)}`);
-        this.log('OR');
-        this.log(`  ${chalk.cyan(`oc process -f ${this.directoryPath}ocp/registry/scc-config.yml | oc apply -f -`)}`);
-        if (this.monitoring === 'elk') {
-            this.log(`  ${chalk.cyan(`oc process -f ${this.directoryPath}ocp/monitoring/simlife-monitoring.yml | oc apply -f -`)}`);
-        }
-        if (this.monitoring === 'prometheus') {
-            this.log(`  ${chalk.cyan(`oc process -f ${this.directoryPath}ocp/monitoring/simlife-metrics.yml | oc apply -f -`)}`);
-        }
-        if (this.useKafka === true) {
-            this.log(`  ${chalk.cyan(`oc process -f ${this.directoryPath}ocp/messagebroker/kafka.yml | oc apply -f -`)}`);
-        }
-        for (let i = 0, regIndex = 0; i < this.appsFolders.length; i++) {
-            const app = this.appConfigs[i];
-            const appName = app.baseName.toLowerCase();
-            if (app.searchEngine === 'elasticsearch') {
-                this.log(`  ${chalk.cyan(`oc process -f ${this.directoryPath}ocp/${appName}/${appName}-elasticsearch.yml | oc apply -f -`)}`);
+        this.log(`  ${chalk.cyan(`${this.directoryPath}/ocp/ocp-apply.sh`)}`);
+        if (this.gatewayNb >= 1 || this.microserviceNb >= 1) {
+            this.log('OR');
+            this.log(`  ${chalk.cyan(`oc apply -f ${this.directoryPath}/ocp/registry`)}`);
+            if (this.monitoring === 'elk' || this.monitoring === 'prometheus') {
+                this.log(`  ${chalk.cyan(`oc apply -f ${this.directoryPath}/ocp/monitoring`)}`);
             }
-            if (app.serviceDiscoveryType !== false && regIndex++ === 0) {
-                this.log(`  ${chalk.cyan(`oc process -f ${this.directoryPath}ocp/registry/application-configmap.yml | oc apply -f -`)}`);
-                if (app.serviceDiscoveryType === 'eureka') {
-                    this.log(`  ${chalk.cyan(`oc process -f ${this.directoryPath}ocp/registry/simlife-registry.yml | oc apply -f -`)}`);
-                } else {
-                    this.log(`  ${chalk.cyan(`oc process -f ${this.directoryPath}ocp/registry/consul.yml | oc apply -f -`)}`);
-                }
+            for (let i = 0; i < this.appsFolders.length; i++) {
+                this.log(`  ${chalk.cyan(`oc apply -f ${this.directoryPath}/ocp/${this.appConfigs[i].baseName}`)}`);
             }
-            if (app.prodDatabaseType !== 'no') {
-                this.log(`  ${chalk.cyan(`oc process -f ${this.directoryPath}ocp/${appName}/${appName}-${app.prodDatabaseType}.yml | oc apply -f -`)}`);
-            }
-            this.log(`  ${chalk.cyan(`oc process -f ${this.directoryPath}ocp/${appName}/${appName}-deployment.yml | oc apply -f -`)}`);
+            this.log('and then install the apps from OpenShift console by choosing the template created in the namespace. ');
         }
 
         if (this.gatewayNb + this.monolithicNb >= 1) {

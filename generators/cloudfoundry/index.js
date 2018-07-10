@@ -1,7 +1,7 @@
 /**
- * Copyright 2018 the original author or authors from the Simlife project.
+ * Copyright 2013-2018 the original author or authors from the Simlife project.
  *
- * This file is part of the Simlife project, see https://www.simlife.io/
+ * This file is part of the Simlife project, see http://www.simlife.tech/
  * for more information.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -57,8 +57,8 @@ module.exports = class extends BaseGenerator {
             copyCloudFoundryFiles() {
                 if (this.abort) return;
                 this.log(chalk.bold('\nCreating Cloud Foundry deployment files'));
-                this.template('manifest.yml.ejs', 'deploy/cloudfoundry/manifest.yml');
-                this.template('application-cloudfoundry.yml.ejs', `${constants.SERVER_MAIN_RES_DIR}config/application-cloudfoundry.yml`);
+                this.template('_manifest.yml', 'deploy/cloudfoundry/manifest.yml');
+                this.template('_application-cloudfoundry.yml', `${constants.SERVER_MAIN_RES_DIR}config/application-cloudfoundry.yml`);
             },
 
             addCloudFoundryDependencies() {
@@ -77,8 +77,8 @@ module.exports = class extends BaseGenerator {
 
                 exec('cf -v', (err) => {
                     if (err) {
-                        this.log.error('cloudfoundry\'s cf command line interface is not available. '
-                            + 'You can install it via https://github.com/cloudfoundry/cli/releases');
+                        this.log.error('cloudfoundry\'s cf command line interface is not available. ' +
+                            'You can install it via https://github.com/cloudfoundry/cli/releases');
                         this.abort = true;
                     }
                     done();
@@ -189,6 +189,7 @@ module.exports = class extends BaseGenerator {
 
                 exec(`cf restart ${this.cloudfoundryDeployedName}`, (err, stdout, stderr) => {
                     this.log(chalk.green('\nYour app should now be live'));
+                    this.log(chalk.yellow(`After application modification, re-deploy it with\n\t${chalk.bold('gulp deploycloudfoundry')}`));
                 });
             }
         };

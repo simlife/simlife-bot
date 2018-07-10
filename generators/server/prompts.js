@@ -1,7 +1,7 @@
 /**
- * Copyright 2018 the original author or authors from the Simlife project.
+ * Copyright 2013-2018 the original author or authors from the Simlife project.
  *
- * This file is part of the Simlife project, see https://www.simlife.io/
+ * This file is part of the Simlife project, see http://www.simlife.tech/
  * for more information.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -55,8 +55,8 @@ function askForServerSideOpts(meta) {
         {
             type: 'input',
             name: 'packageName',
-            validate: input => (/^([a-z_]{1}[a-z0-9_]*(\.[a-z_]{1}[a-z0-9_]*)*)$/.test(input)
-                ? true : 'The package name you have provided is not a valid Java package name.'),
+            validate: input => (/^([a-z_]{1}[a-z0-9_]*(\.[a-z_]{1}[a-z0-9_]*)*)$/.test(input) ?
+                true : 'The package name you have provided is not a valid Java package name.'),
             message: 'What is your default Java package name?',
             default: 'com.mycompany.myapp',
             store: true
@@ -101,8 +101,8 @@ function askForServerSideOpts(meta) {
         },
         {
             when: response => (
-                (applicationType === 'monolith' && response.serviceDiscoveryType !== 'eureka')
-                || ['gateway', 'microservice'].includes(applicationType)
+                (applicationType === 'monolith' && response.serviceDiscoveryType !== 'eureka') ||
+                ['gateway', 'microservice'].includes(applicationType)
             ),
             type: 'list',
             name: 'authenticationType',
@@ -163,23 +163,21 @@ function askForServerSideOpts(meta) {
                         name: 'MongoDB'
                     },
                     {
+                        value: 'cassandra',
+                        name: 'Cassandra'
+                    },
+                    {
                         value: 'couchbase',
                         name: '[BETA] Couchbase'
                     }
                 ];
                 if (
-                    (response.authenticationType !== 'oauth2' && applicationType === 'microservice')
-                    || (response.authenticationType === 'uaa' && applicationType === 'gateway')
+                    applicationType === 'microservice' || ((response.authenticationType === 'uaa' ||
+                    response.authenticationType === 'oauth2') && applicationType === 'gateway')
                 ) {
                     opts.push({
                         value: 'no',
                         name: 'No database'
-                    });
-                }
-                if (response.authenticationType !== 'oauth2') {
-                    opts.push({
-                        value: 'cassandra',
-                        name: 'Cassandra'
                     });
                 }
                 return opts;
@@ -212,8 +210,8 @@ function askForServerSideOpts(meta) {
             default: 0
         },
         {
-            // cache is mandatory for gateway with service dsicovery and defined later to 'hazelcast' value
-            when: response => !(applicationType === 'gateway' && response.serviceDiscoveryType),
+            // cache is mandatory for gateway and defined later to 'hazelcast' value
+            when: response => applicationType !== 'gateway',
             type: 'list',
             name: 'cacheProvider',
             message: 'Do you want to use the Spring cache abstraction?',
@@ -228,21 +226,17 @@ function askForServerSideOpts(meta) {
                 },
                 {
                     value: 'infinispan',
-                    name: '[BETA] Yes, with the Infinispan implementation (hybrid cache, for multiple nodes)'
-                },
-                {
-                    value: 'memcached',
-                    name: 'Yes, with Memcached (distributed cache) - Warning, when using an SQL database, this will disable the Hibernate 2nd level cache!'
+                    name: '[BETA] Yes, with the Infinispan (hybrid cache, for multiple nodes)'
                 },
                 {
                     value: 'no',
-                    name: 'No - Warning, when using an SQL database, this will disable the Hibernate 2nd level cache!'
+                    name: 'No (when using an SQL database, this will also disable the Hibernate L2 cache)'
                 }
             ],
             default: (applicationType === 'microservice' || applicationType === 'uaa') ? 1 : 0
         },
         {
-            when: response => (((response.cacheProvider !== 'no' && response.cacheProvider !== 'memcached') || applicationType === 'gateway') && response.databaseType === 'sql'),
+            when: response => ((response.cacheProvider !== 'no' || applicationType === 'gateway') && response.databaseType === 'sql'),
             type: 'confirm',
             name: 'enableHibernateCache',
             message: 'Do you want to use Hibernate 2nd level cache?',
@@ -329,7 +323,7 @@ function askForServerSideOpts(meta) {
             this.enableHibernateCache = false;
         }
         // Hazelcast is mandatory for Gateways, as it is used for rate limiting
-        if (this.applicationType === 'gateway' && this.serviceDiscoveryType) {
+        if (this.applicationType === 'gateway') {
             this.cacheProvider = 'hazelcast';
         }
         done();
@@ -342,6 +336,12 @@ function askForOptionalItems(meta) {
     const applicationType = this.applicationType;
     const choices = [];
     const defaultChoice = [];
+    if (this.databaseType !== 'cassandra' && applicationType === 'monolith' && (this.authenticationType === 'session' || this.authenticationType === 'jwt')) {
+        choices.push({
+            name: 'Social login (Google, Facebook, Twitter)',
+            value: 'enableSocialSignIn:true'
+        });
+    }
     if (this.databaseType === 'sql' || this.databaseType === 'mongodb') {
         choices.push({
             name: 'Search engine using Elasticsearch',
@@ -355,7 +355,7 @@ function askForOptionalItems(meta) {
         });
     }
     choices.push({
-        name: 'API first development using OpenAPI-generator',
+        name: 'API first development using swagger-codegen',
         value: 'enableSwaggerCodegen:true'
     });
     choices.push({
@@ -379,6 +379,7 @@ function askForOptionalItems(meta) {
             this.serverSideOptions = prompt.serverSideOptions;
             this.websocket = this.getOptionFromArray(this.serverSideOptions, 'websocket');
             this.searchEngine = this.getOptionFromArray(this.serverSideOptions, 'searchEngine');
+            this.enableSocialSignIn = this.getOptionFromArray(this.serverSideOptions, 'enableSocialSignIn');
             this.messageBroker = this.getOptionFromArray(this.serverSideOptions, 'messageBroker');
             this.enableSwaggerCodegen = this.getOptionFromArray(this.serverSideOptions, 'enableSwaggerCodegen');
             // Only set this option if it hasn't been set in a previous question, as it's only optional for monoliths

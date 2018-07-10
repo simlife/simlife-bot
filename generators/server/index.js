@@ -1,7 +1,7 @@
 /**
- * Copyright 2018 the original author or authors from the Simlife project.
+ * Copyright 2013-2018 the original author or authors from the Simlife project.
  *
- * This file is part of the Simlife project, see https://www.simlife.io/
+ * This file is part of the Simlife project, see http://www.simlife.tech/
  * for more information.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,12 +19,12 @@
 /* eslint-disable consistent-return */
 const chalk = require('chalk');
 const _ = require('lodash');
-const crypto = require('crypto');
-const os = require('os');
 const prompts = require('./prompts');
 const BaseGenerator = require('../generator-base');
 const writeFiles = require('./files').writeFiles;
 const packagejs = require('../../package.json');
+const crypto = require('crypto');
+const os = require('os');
 const constants = require('../generator-constants');
 
 let useBlueprint;
@@ -37,7 +37,7 @@ module.exports = class extends BaseGenerator {
 
         // This adds support for a `--[no-]client-hook` flag
         this.option('client-hook', {
-            desc: 'Enable Webpack hook from maven/gradle build',
+            desc: 'Enable gulp and bower hook from maven/gradle build',
             type: Boolean,
             defaults: false
         });
@@ -79,24 +79,11 @@ module.exports = class extends BaseGenerator {
 
         this.setupServerOptions(this);
         const blueprint = this.options.blueprint || this.configOptions.blueprint || this.config.get('blueprint');
-        if (!opts.fromBlueprint) {
-            // use global variable since getters dont have access to instance property
-            useBlueprint = this.composeBlueprint(
-                blueprint,
-                'server',
-                {
-                    'client-hook': !this.skipClient,
-                    configOptions: this.configOptions,
-                    force: this.options.force
-                }
-            );
-        } else {
-            useBlueprint = false;
-        }
+        useBlueprint = this.composeBlueprint(blueprint, 'server'); // use global variable since getters dont have access to instance property
     }
 
-    // Public API method used by the getter and also by Blueprints
-    _initializing() {
+    get initializing() {
+        if (useBlueprint) return;
         return {
             displayLogo() {
                 if (this.logo) {
@@ -125,7 +112,6 @@ module.exports = class extends BaseGenerator {
                 this.DOCKER_MSSQL = constants.DOCKER_MSSQL;
                 this.DOCKER_ORACLE = constants.DOCKER_ORACLE;
                 this.DOCKER_HAZELCAST_MANAGEMENT_CENTER = constants.DOCKER_HAZELCAST_MANAGEMENT_CENTER;
-                this.DOCKER_MEMCACHED = constants.DOCKER_MEMCACHED;
                 this.DOCKER_CASSANDRA = constants.DOCKER_CASSANDRA;
                 this.DOCKER_ELASTICSEARCH = constants.DOCKER_ELASTICSEARCH;
                 this.DOCKER_KEYCLOAK = constants.DOCKER_KEYCLOAK;
@@ -148,39 +134,39 @@ module.exports = class extends BaseGenerator {
                 this.NPM_VERSION = constants.NPM_VERSION;
 
                 this.packagejs = packagejs;
-                const configuration = this.getAllSimlifeConfig(this, true);
-                this.applicationType = configuration.get('applicationType') || this.configOptions.applicationType;
+                this.applicationType = this.config.get('applicationType') || this.configOptions.applicationType;
                 if (!this.applicationType) {
                     this.applicationType = 'monolith';
                 }
-                this.packageName = configuration.get('packageName');
-                this.serverPort = configuration.get('serverPort');
+
+                this.packageName = this.config.get('packageName');
+                this.serverPort = this.config.get('serverPort');
                 if (this.serverPort === undefined) {
                     this.serverPort = '8080';
                 }
-                this.websocket = configuration.get('websocket') === 'no' ? false : configuration.get('websocket');
-                this.searchEngine = configuration.get('searchEngine') === 'no' ? false : configuration.get('searchEngine');
+                this.websocket = this.config.get('websocket') === 'no' ? false : this.config.get('websocket');
+                this.searchEngine = this.config.get('searchEngine') === 'no' ? false : this.config.get('searchEngine');
                 if (this.searchEngine === undefined) {
                     this.searchEngine = false;
                 }
-                this.simPrefix = this.configOptions.simPrefix || configuration.get('simPrefix');
+                this.simPrefix = this.configOptions.simPrefix || this.config.get('simPrefix');
                 this.simTablePrefix = this.getTableName(this.simPrefix);
-                this.messageBroker = configuration.get('messageBroker') === 'no' ? false : configuration.get('messageBroker');
+                this.messageBroker = this.config.get('messageBroker') === 'no' ? false : this.config.get('messageBroker');
                 if (this.messageBroker === undefined) {
                     this.messageBroker = false;
                 }
 
-                this.enableSwaggerCodegen = configuration.get('enableSwaggerCodegen');
+                this.enableSwaggerCodegen = this.config.get('enableSwaggerCodegen');
 
-                this.serviceDiscoveryType = configuration.get('serviceDiscoveryType') === 'no' ? false : configuration.get('serviceDiscoveryType');
+                this.serviceDiscoveryType = this.config.get('serviceDiscoveryType') === 'no' ? false : this.config.get('serviceDiscoveryType');
                 if (this.serviceDiscoveryType === undefined) {
                     this.serviceDiscoveryType = false;
                 }
 
-                this.cacheProvider = configuration.get('cacheProvider') || configuration.get('hibernateCache') || 'no';
-                this.enableHibernateCache = configuration.get('enableHibernateCache') || (configuration.get('hibernateCache') !== undefined && configuration.get('hibernateCache') !== 'no' && configuration.get('hibernateCache') !== 'memcached');
+                this.cacheProvider = this.config.get('cacheProvider') || this.config.get('hibernateCache') || 'no';
+                this.enableHibernateCache = this.config.get('enableHibernateCache') || (this.config.get('hibernateCache') !== undefined && this.config.get('hibernateCache') !== 'no');
 
-                this.databaseType = configuration.get('databaseType');
+                this.databaseType = this.config.get('databaseType');
                 if (this.databaseType === 'mongodb') {
                     this.devDatabaseType = 'mongodb';
                     this.prodDatabaseType = 'mongodb';
@@ -200,35 +186,36 @@ module.exports = class extends BaseGenerator {
                     this.enableHibernateCache = false;
                 } else {
                     // sql
-                    this.devDatabaseType = configuration.get('devDatabaseType');
-                    this.prodDatabaseType = configuration.get('prodDatabaseType');
+                    this.devDatabaseType = this.config.get('devDatabaseType');
+                    this.prodDatabaseType = this.config.get('prodDatabaseType');
                 }
 
                 // Hazelcast is mandatory for Gateways, as it is used for rate limiting
-                if (this.applicationType === 'gateway' && this.serviceDiscoveryType) {
+                if (this.applicationType === 'gateway') {
                     this.cacheProvider = 'hazelcast';
                 }
 
-                this.buildTool = configuration.get('buildTool');
+                this.buildTool = this.config.get('buildTool');
+                this.enableSocialSignIn = this.config.get('enableSocialSignIn');
                 this.simlifeVersion = packagejs.version;
                 if (this.simlifeVersion === undefined) {
-                    this.simlifeVersion = configuration.get('simlifeVersion');
+                    this.simlifeVersion = this.config.get('simlifeVersion');
                 }
-                this.authenticationType = configuration.get('authenticationType');
+                this.authenticationType = this.config.get('authenticationType');
                 if (this.authenticationType === 'session') {
-                    this.rememberMeKey = configuration.get('rememberMeKey');
+                    this.rememberMeKey = this.config.get('rememberMeKey');
                 }
-                this.jwtSecretKey = configuration.get('jwtSecretKey');
-                this.nativeLanguage = configuration.get('nativeLanguage');
-                this.languages = configuration.get('languages');
-                this.uaaBaseName = configuration.get('uaaBaseName');
-                this.clientFramework = configuration.get('clientFramework');
-                const testFrameworks = configuration.get('testFrameworks');
+                this.jwtSecretKey = this.config.get('jwtSecretKey');
+                this.nativeLanguage = this.config.get('nativeLanguage');
+                this.languages = this.config.get('languages');
+                this.uaaBaseName = this.config.get('uaaBaseName');
+                this.clientFramework = this.config.get('clientFramework');
+                const testFrameworks = this.config.get('testFrameworks');
                 if (testFrameworks) {
                     this.testFrameworks = testFrameworks;
                 }
 
-                const baseName = configuration.get('baseName');
+                const baseName = this.config.get('baseName');
                 if (baseName) {
                     // to avoid overriding name from configOptions
                     this.baseName = baseName;
@@ -239,16 +226,16 @@ module.exports = class extends BaseGenerator {
                     this.websocket = false;
                 }
 
-                const serverConfigFound = this.packageName !== undefined
-                    && this.authenticationType !== undefined
-                    && this.cacheProvider !== undefined
-                    && this.enableHibernateCache !== undefined
-                    && this.websocket !== undefined
-                    && this.databaseType !== undefined
-                    && this.devDatabaseType !== undefined
-                    && this.prodDatabaseType !== undefined
-                    && this.searchEngine !== undefined
-                    && this.buildTool !== undefined;
+                const serverConfigFound = this.packageName !== undefined &&
+                    this.authenticationType !== undefined &&
+                    this.cacheProvider !== undefined &&
+                    this.enableHibernateCache !== undefined &&
+                    this.websocket !== undefined &&
+                    this.databaseType !== undefined &&
+                    this.devDatabaseType !== undefined &&
+                    this.prodDatabaseType !== undefined &&
+                    this.searchEngine !== undefined &&
+                    this.buildTool !== undefined;
 
                 if (this.baseName !== undefined && serverConfigFound) {
                     // Generate remember me key if key does not already exist in config
@@ -259,6 +246,11 @@ module.exports = class extends BaseGenerator {
                     // Generate JWT secret key if key does not already exist in config
                     if (this.authenticationType === 'jwt' && this.jwtSecretKey === undefined) {
                         this.jwtSecretKey = crypto.randomBytes(20).toString('hex');
+                    }
+
+                    // If social sign in is not defined, it is disabled by default
+                    if (this.enableSocialSignIn === undefined) {
+                        this.enableSocialSignIn = false;
                     }
 
                     // If translation is not defined, it is enabled by default
@@ -276,8 +268,8 @@ module.exports = class extends BaseGenerator {
                         this.skipUserManagement = true;
                     }
 
-                    this.log(chalk.green('This is an existing project, using the configuration from your .yo-rc.json file \n'
-                        + 'to re-generate the project...\n'));
+                    this.log(chalk.green('This is an existing project, using the configuration from your .yo-rc.json file \n' +
+                        'to re-generate the project...\n'));
 
                     this.existingProject = true;
                 }
@@ -285,13 +277,8 @@ module.exports = class extends BaseGenerator {
         };
     }
 
-    get initializing() {
+    get prompting() {
         if (useBlueprint) return;
-        return this._initializing();
-    }
-
-    // Public API method used by the getter and also by Blueprints
-    _prompting() {
         return {
             askForModuleName: prompts.askForModuleName,
             askForServerSideOpts: prompts.askForServerSideOpts,
@@ -310,6 +297,7 @@ module.exports = class extends BaseGenerator {
                 this.configOptions.messageBroker = this.messageBroker;
                 this.configOptions.serviceDiscoveryType = this.serviceDiscoveryType;
                 this.configOptions.buildTool = this.buildTool;
+                this.configOptions.enableSocialSignIn = this.enableSocialSignIn;
                 this.configOptions.enableSwaggerCodegen = this.enableSwaggerCodegen;
                 this.configOptions.authenticationType = this.authenticationType;
                 this.configOptions.uaaBaseName = this.uaaBaseName;
@@ -329,13 +317,8 @@ module.exports = class extends BaseGenerator {
         };
     }
 
-    get prompting() {
+    get configuring() {
         if (useBlueprint) return;
-        return this._prompting();
-    }
-
-    // Public API method used by the getter and also by Blueprints
-    _configuring() {
         return {
             insight() {
                 const insight = this.insight();
@@ -351,6 +334,7 @@ module.exports = class extends BaseGenerator {
                 insight.track('app/messageBroker', this.messageBroker);
                 insight.track('app/serviceDiscoveryType', this.serviceDiscoveryType);
                 insight.track('app/buildTool', this.buildTool);
+                insight.track('app/enableSocialSignIn', this.enableSocialSignIn);
                 insight.track('app/enableSwaggerCodegen', this.enableSwaggerCodegen);
             },
 
@@ -362,10 +346,11 @@ module.exports = class extends BaseGenerator {
                 this.lowercaseBaseName = this.baseName.toLowerCase();
                 this.humanizedBaseName = _.startCase(this.baseName);
                 this.mainClass = this.getMainClassName();
-                this.cacheManagerIsAvailable = ['ehcache', 'hazelcast', 'infinispan', 'memcached'].includes(this.cacheProvider);
+
                 this.pkType = this.getPkType(this.databaseType);
 
                 this.packageFolder = this.packageName.replace(/\./g, '/');
+                this.testDir = `${constants.SERVER_TEST_SRC_DIR + this.packageFolder}/`;
                 if (!this.nativeLanguage) {
                     // set to english when translation is set to false
                     this.nativeLanguage = 'en';
@@ -373,46 +358,38 @@ module.exports = class extends BaseGenerator {
             },
 
             saveConfig() {
-                const config = {
-                    simlifeVersion: packagejs.version,
-                    applicationType: this.applicationType,
-                    baseName: this.baseName,
-                    packageName: this.packageName,
-                    packageFolder: this.packageFolder,
-                    serverPort: this.serverPort,
-                    authenticationType: this.authenticationType,
-                    uaaBaseName: this.uaaBaseName,
-                    cacheProvider: this.cacheProvider,
-                    enableHibernateCache: this.enableHibernateCache,
-                    websocket: this.websocket,
-                    databaseType: this.databaseType,
-                    devDatabaseType: this.devDatabaseType,
-                    prodDatabaseType: this.prodDatabaseType,
-                    searchEngine: this.searchEngine,
-                    messageBroker: this.messageBroker,
-                    serviceDiscoveryType: this.serviceDiscoveryType,
-                    buildTool: this.buildTool,
-                    enableSwaggerCodegen: this.enableSwaggerCodegen,
-                    jwtSecretKey: this.jwtSecretKey,
-                    rememberMeKey: this.rememberMeKey,
-                    enableTranslation: this.enableTranslation
-                };
+                this.config.set('simlifeVersion', packagejs.version);
+                this.config.set('baseName', this.baseName);
+                this.config.set('packageName', this.packageName);
+                this.config.set('packageFolder', this.packageFolder);
+                this.config.set('serverPort', this.serverPort);
+                this.config.set('authenticationType', this.authenticationType);
+                this.config.set('uaaBaseName', this.uaaBaseName);
+                this.config.set('cacheProvider', this.cacheProvider);
+                this.config.set('enableHibernateCache', this.enableHibernateCache);
+                this.config.set('websocket', this.websocket);
+                this.config.set('databaseType', this.databaseType);
+                this.config.set('devDatabaseType', this.devDatabaseType);
+                this.config.set('prodDatabaseType', this.prodDatabaseType);
+                this.config.set('searchEngine', this.searchEngine);
+                this.config.set('messageBroker', this.messageBroker);
+                this.config.set('serviceDiscoveryType', this.serviceDiscoveryType);
+                this.config.set('buildTool', this.buildTool);
+                this.config.set('enableSocialSignIn', this.enableSocialSignIn);
+                this.config.set('enableSwaggerCodegen', this.enableSwaggerCodegen);
+                this.config.set('jwtSecretKey', this.jwtSecretKey);
+                this.config.set('rememberMeKey', this.rememberMeKey);
+                this.config.set('enableTranslation', this.enableTranslation);
                 if (this.enableTranslation && !this.configOptions.skipI18nQuestion) {
-                    config.nativeLanguage = this.nativeLanguage;
-                    config.languages = this.languages;
+                    this.config.set('nativeLanguage', this.nativeLanguage);
+                    this.config.set('languages', this.languages);
                 }
-                this.config.set(config);
             }
         };
     }
 
-    get configuring() {
+    get default() {
         if (useBlueprint) return;
-        return this._configuring();
-    }
-
-    // Public API method used by the getter and also by Blueprints
-    _default() {
         return {
             getSharedConfigOptions() {
                 this.useSass = this.configOptions.useSass ? this.configOptions.useSass : false;
@@ -444,49 +421,30 @@ module.exports = class extends BaseGenerator {
         };
     }
 
-    get default() {
-        if (useBlueprint) return;
-        return this._default();
-    }
-
-    // Public API method used by the getter and also by Blueprints
-    _writing() {
-        return writeFiles(useBlueprint);
-    }
-
     get writing() {
         if (useBlueprint) return;
-        return this._writing();
+        return writeFiles();
     }
 
-    // Public API method used by the getter and also by Blueprints
-    _end() {
-        return {
-            end() {
-                if (this.prodDatabaseType === 'oracle') {
-                    this.log('\n\n');
-                    this.warning(`${chalk.yellow.bold('You have selected Oracle database.\n')
-                    }Please follow our documentation on using Oracle to set up the \n`
-                        + 'Oracle proprietary JDBC driver.');
-                }
-                this.log(chalk.green.bold('\nServer application generated successfully.\n'));
-
-                let executable = 'mvnw';
-                if (this.buildTool === 'gradle') {
-                    executable = 'gradlew';
-                }
-                let logMsgComment = '';
-                if (os.platform() === 'win32') {
-                    logMsgComment = ` (${chalk.yellow.bold(executable)} if using Windows Command Prompt)`;
-                }
-                this.log(chalk.green(`${'Run your Spring Boot application:'
-                    + '\n '}${chalk.yellow.bold(`./${executable}`)}${logMsgComment}`));
-            }
-        };
-    }
-
-    get end() {
+    end() {
         if (useBlueprint) return;
-        return this._end();
+        if (this.prodDatabaseType === 'oracle') {
+            this.log('\n\n');
+            this.warning(`${chalk.yellow.bold('You have selected Oracle database.\n')
+            }Please follow our documentation on using Oracle to set up the \n` +
+                'Oracle proprietary JDBC driver.');
+        }
+        this.log(chalk.green.bold('\nServer application generated successfully.\n'));
+
+        let executable = 'mvnw';
+        if (this.buildTool === 'gradle') {
+            executable = 'gradlew';
+        }
+        let logMsgComment = '';
+        if (os.platform() === 'win32') {
+            logMsgComment = ` (${chalk.yellow.bold(executable)} if using Windows Command Prompt)`;
+        }
+        this.log(chalk.green(`${'Run your Spring Boot application:' +
+            '\n '}${chalk.yellow.bold(`./${executable}`)}${logMsgComment}`));
     }
 };

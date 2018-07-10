@@ -1,7 +1,7 @@
 /**
- * Copyright 2018 the original author or authors from the Simlife project.
+ * Copyright 2013-2018 the original author or authors from the Simlife project.
  *
- * This file is part of the Simlife project, see https://www.simlife.io/
+ * This file is part of the Simlife project, see http://www.simlife.tech/
  * for more information.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -21,23 +21,17 @@ const path = require('path');
 const _ = require('lodash');
 const fs = require('fs');
 const Generator = require('yeoman-generator');
-const Storage = require('yeoman-generator/lib/util/storage');
 const chalk = require('chalk');
 const Insight = require('insight');
 const shelljs = require('shelljs');
 const semver = require('semver');
 const exec = require('child_process').exec;
 const https = require('https');
-const jhiCore = require('simlife-core');
-const filter = require('gulp-filter');
+const simCore = require('simlife-core');
 
 const packagejs = require('../package.json');
 const simlifeUtils = require('./utils');
 const constants = require('./generator-constants');
-const {
-    prettierTransform,
-    prettierOptions
-} = require('./generator-transforms');
 
 const CLIENT_MAIN_SRC_DIR = constants.CLIENT_MAIN_SRC_DIR;
 
@@ -45,7 +39,7 @@ const CLIENT_MAIN_SRC_DIR = constants.CLIENT_MAIN_SRC_DIR;
  * This is the Generator base private class.
  * This provides all the private API methods used internally.
  * These methods should not be directly utilized using commonJS require,
- * as these can have breaking changes without a major version bump
+ * as these can have breaking changes without a major version bumb
  *
  * The method signatures in private API can be changed without a major version change.
  */
@@ -53,9 +47,6 @@ module.exports = class extends Generator {
     constructor(args, opts) {
         super(args, opts);
         this.env.options.appPath = this.config.get('appPath') || CLIENT_MAIN_SRC_DIR;
-        // expose lodash to templates
-        this._ = _;
-        this.createConfigFromNewConfFile();
     }
 
     /* ======================================================================== */
@@ -74,11 +65,9 @@ module.exports = class extends Generator {
         if (generator.databaseType !== 'no' && generator.databaseType !== 'cassandra') {
             generator.copyI18nFilesByName(generator, webappDir, 'audits.json', lang);
         }
-        if (generator.applicationType === 'gateway' && generator.serviceDiscoveryType) {
-            generator.copyI18nFilesByName(generator, webappDir, 'gateway.json', lang);
-        }
         generator.copyI18nFilesByName(generator, webappDir, 'configuration.json', lang);
         generator.copyI18nFilesByName(generator, webappDir, 'error.json', lang);
+        generator.copyI18nFilesByName(generator, webappDir, 'gateway.json', lang);
         generator.copyI18nFilesByName(generator, webappDir, 'login.json', lang);
         generator.copyI18nFilesByName(generator, webappDir, 'home.json', lang);
         generator.copyI18nFilesByName(generator, webappDir, 'metrics.json', lang);
@@ -94,11 +83,15 @@ module.exports = class extends Generator {
             generator.copyI18nFilesByName(generator, webappDir, 'tracker.json', lang);
         }
 
+        if (this.enableSocialSignIn) {
+            generator.copyI18nFilesByName(generator, webappDir, 'social.json', lang);
+        }
+
         // Templates
-        generator.template(`${webappDir}i18n/${lang}/activate.json.ejs`, `${webappDir}i18n/${lang}/activate.json`);
-        generator.template(`${webappDir}i18n/${lang}/global.json.ejs`, `${webappDir}i18n/${lang}/global.json`);
-        generator.template(`${webappDir}i18n/${lang}/health.json.ejs`, `${webappDir}i18n/${lang}/health.json`);
-        generator.template(`${webappDir}i18n/${lang}/reset.json.ejs`, `${webappDir}i18n/${lang}/reset.json`);
+        generator.template(`${webappDir}i18n/${lang}/_activate.json`, `${webappDir}i18n/${lang}/activate.json`);
+        generator.template(`${webappDir}i18n/${lang}/_global.json`, `${webappDir}i18n/${lang}/global.json`);
+        generator.template(`${webappDir}i18n/${lang}/_health.json`, `${webappDir}i18n/${lang}/health.json`);
+        generator.template(`${webappDir}i18n/${lang}/_reset.json`, `${webappDir}i18n/${lang}/reset.json`);
     }
 
     /**
@@ -112,7 +105,7 @@ module.exports = class extends Generator {
         const generator = _this || this;
         // Template the message server side properties
         const langProp = lang.replace(/-/g, '_');
-        generator.template(`${resourceDir}i18n/messages_${langProp}.properties.ejs`, `${resourceDir}i18n/messages_${langProp}.properties`);
+        generator.template(`${resourceDir}i18n/_messages_${langProp}.properties`, `${resourceDir}i18n/messages_${langProp}.properties`);
     }
 
     /**
@@ -123,8 +116,7 @@ module.exports = class extends Generator {
      */
     copyI18n(language, prefix = '') {
         try {
-            const fileName = this.entityTranslationKey;
-            this.template(`${prefix ? `${prefix}/` : ''}i18n/entity_${language}.json.ejs`, `${CLIENT_MAIN_SRC_DIR}i18n/${language}/${fileName}.json`);
+            this.template(`${prefix ? `${prefix}/` : ''}i18n/_entity_${language}.json`, `${CLIENT_MAIN_SRC_DIR}i18n/${language}/${this.entityInstance}.json`);
             this.addEntityTranslationKey(this.entityTranslationKeyMenu, this.entityClass, language);
         } catch (e) {
             this.debug('Error:', e);
@@ -142,7 +134,7 @@ module.exports = class extends Generator {
      */
     copyEnumI18n(language, enumInfo, prefix = '') {
         try {
-            this.template(`${prefix ? `${prefix}/` : ''}i18n/enum.json.ejs`, `${CLIENT_MAIN_SRC_DIR}i18n/${language}/${enumInfo.clientRootFolder}${enumInfo.enumInstance}.json`, this, {}, enumInfo);
+            this.template(`${prefix ? `${prefix}/` : ''}i18n/_enum.json`, `${CLIENT_MAIN_SRC_DIR}i18n/${language}/${enumInfo.enumInstance}.json`, this, {}, enumInfo);
         } catch (e) {
             this.debug('Error:', e);
             // An exception is thrown if the folder doesn't exist
@@ -162,9 +154,9 @@ module.exports = class extends Generator {
             languages.forEach((language, i) => {
                 content += `            '${language}'${i !== languages.length - 1 ? ',' : ''}\n`;
             });
-            content
-                += '            // simlife-needle-i18n-language-constant - Simlife will add/remove languages in this array\n'
-                + '        ]';
+            content +=
+                '            // simlife-needle-i18n-language-constant - Simlife will add/remove languages in this array\n' +
+                '        ]';
 
             simlifeUtils.replaceContent({
                 file: fullPath,
@@ -183,18 +175,15 @@ module.exports = class extends Generator {
      * @param languages
      */
     updateLanguagesInLanguageConstantNG2(languages) {
-        if (this.clientFramework !== 'angularX') {
-            return;
-        }
-        const fullPath = `${CLIENT_MAIN_SRC_DIR}app/core/language/language.constants.ts`;
+        const fullPath = `${CLIENT_MAIN_SRC_DIR}app/shared/language/language.constants.ts`;
         try {
             let content = 'export const LANGUAGES: string[] = [\n';
             languages.forEach((language, i) => {
                 content += `    '${language}'${i !== languages.length - 1 ? ',' : ''}\n`;
             });
-            content
-                += '    // simlife-needle-i18n-language-constant - Simlife will add/remove languages in this array\n'
-                + '];';
+            content +=
+                '    // simlife-needle-i18n-language-constant - Simlife will add/remove languages in this array\n' +
+                '];';
 
             simlifeUtils.replaceContent({
                 file: fullPath,
@@ -213,15 +202,18 @@ module.exports = class extends Generator {
      * @param languages
      */
     updateLanguagesInLanguagePipe(languages) {
-        const fullPath = this.clientFramework === 'angularX' ? `${CLIENT_MAIN_SRC_DIR}app/shared/language/find-language-from-key.pipe.ts` : `${CLIENT_MAIN_SRC_DIR}/app/config/translation.ts`;
+        let fullPath = `${CLIENT_MAIN_SRC_DIR}app/shared/language/find-language-from-key.pipe.ts`;
+        if (this.clientFramework === 'angular1') {
+            fullPath = `${CLIENT_MAIN_SRC_DIR}app/components/language/language.filter.js`;
+        }
         try {
             let content = '{\n';
-            this.generateLanguageOptions(languages, this.clientFramework).forEach((ln, i) => {
+            this.generateLanguageOptions(languages).forEach((ln, i) => {
                 content += `        ${ln}${i !== languages.length - 1 ? ',' : ''}\n`;
             });
-            content
-                += '        // simlife-needle-i18n-language-key-pipe - Simlife will add/remove languages in this object\n'
-                + '    };';
+            content +=
+                '        // simlife-needle-i18n-language-key-pipe - Simlife will add/remove languages in this object\n' +
+                '    };';
 
             simlifeUtils.replaceContent({
                 file: fullPath,
@@ -246,67 +238,13 @@ module.exports = class extends Generator {
             languages.forEach((language, i) => {
                 content += `                    { pattern: "./src/main/webapp/i18n/${language}/*.json", fileName: "./i18n/${language}.json" }${i !== languages.length - 1 ? ',' : ''}\n`;
             });
-            content
-                += '                    // simlife-needle-i18n-language-webpack - Simlife will add/remove languages in this array\n'
-                + '                ]';
+            content +=
+                '                    // simlife-needle-i18n-language-webpack - Simlife will add/remove languages in this array\n' +
+                '                ]';
 
             simlifeUtils.replaceContent({
                 file: fullPath,
                 pattern: /groupBy:.*\[([^\]]*simlife-needle-i18n-language-webpack[^\]]*)\]/g,
-                content
-            }, this);
-        } catch (e) {
-            this.log(chalk.yellow('\nUnable to find ') + fullPath + chalk.yellow(' or missing required simlife-needle. Webpack language task not updated with languages: ') + languages + chalk.yellow(' since block was not found. Check if you have enabled translation support.\n'));
-            this.debug('Error:', e);
-        }
-    }
-
-    /**
-     * Update Moment Locales to keep in webpack prod build
-     *
-     * @param languages
-     */
-    updateLanguagesInMomentWebpackNgx(languages) {
-        const fullPath = 'webpack/webpack.prod.js';
-        try {
-            let content = 'localesToKeep: [\n';
-            languages.forEach((language, i) => {
-                content += `                    '${language}'${i !== languages.length - 1 ? ',' : ''}\n`;
-            });
-            content
-                += '                    // simlife-needle-i18n-language-moment-webpack - Simlife will add/remove languages in this array\n'
-                + '                ]';
-
-            simlifeUtils.replaceContent({
-                file: fullPath,
-                pattern: /localesToKeep:.*\[([^\]]*simlife-needle-i18n-language-moment-webpack[^\]]*)\]/g,
-                content
-            }, this);
-        } catch (e) {
-            this.log(chalk.yellow('\nUnable to find ') + fullPath + chalk.yellow(' or missing required simlife-needle. Webpack language task not updated with languages: ') + languages + chalk.yellow(' since block was not found. Check if you have enabled translation support.\n'));
-            this.debug('Error:', e);
-        }
-    }
-
-    /**
-     * Update Moment Locales to keep in webpack prod build
-     *
-     * @param languages
-     */
-    updateLanguagesInMomentWebpackReact(languages) {
-        const fullPath = 'webpack/webpack.prod.js';
-        try {
-            let content = 'localesToKeep: [\n';
-            languages.forEach((language, i) => {
-                content += `        '${language}'${i !== languages.length - 1 ? ',' : ''}\n`;
-            });
-            content
-                += '        // simlife-needle-i18n-language-moment-webpack - Simlife will add/remove languages in this array\n'
-                + '      ]';
-
-            simlifeUtils.replaceContent({
-                file: fullPath,
-                pattern: /localesToKeep:.*\[([^\]]*simlife-needle-i18n-language-moment-webpack[^\]]*)\]/g,
                 content
             }, this);
         } catch (e) {
@@ -405,7 +343,7 @@ module.exports = class extends Generator {
             return text;
         }
         const rows = text.split('\n');
-        let description = this.formatLineForJavaStringUse(rows[0]);
+        let description = rows[0];
         for (let i = 1; i < rows.length; i++) {
             // discard empty rows
             if (rows[i].trim() !== '') {
@@ -424,41 +362,6 @@ module.exports = class extends Generator {
             return text;
         }
         return text.replace(/"/g, '\\"');
-    }
-
-    /**
-     * Format As Liquibase Remarks
-     *
-     * @param {string} text - text to format
-     * @returns formatted liquibase remarks
-     */
-    formatAsLiquibaseRemarks(text) {
-        if (!text) {
-            return text;
-        }
-        const rows = text.split('\n');
-        let description = rows[0];
-        for (let i = 1; i < rows.length; i++) {
-            // discard empty rows
-            if (rows[i].trim() !== '') {
-                // if simple text then put space between row strings
-                if (!description.endsWith('>') && !rows[i].startsWith('<')) {
-                    description += ' ';
-                }
-                description += rows[i];
-            }
-        }
-        // escape & to &amp;
-        description = description.replace(/&/g, '&amp;');
-        // escape " to &quot;
-        description = description.replace(/"/g, '&quot;');
-        // escape ' to &apos;
-        description = description.replace(/'/g, '&apos;');
-        // escape < to &lt;
-        description = description.replace(/</g, '&lt;');
-        // escape > to &gt;
-        description = description.replace(/>/g, '&gt;');
-        return description;
     }
 
     /**
@@ -560,9 +463,9 @@ module.exports = class extends Generator {
             value = value.replace('.', '_');
             res = value[0];
             for (let i = 1, len = value.length - 1; i < len; i++) {
-                if (value[i - 1] !== value[i - 1].toUpperCase()
-                    && value[i] !== value[i].toLowerCase()
-                    && value[i + 1] !== value[i + 1].toUpperCase()
+                if (value[i - 1] !== value[i - 1].toUpperCase() &&
+                    value[i] !== value[i].toLowerCase() &&
+                    value[i + 1] !== value[i + 1].toUpperCase()
                 ) {
                     res += `_${value[i]}`;
                 } else {
@@ -583,7 +486,6 @@ module.exports = class extends Generator {
     contains(array, item) {
         return _.includes(array, item);
     }
-
     /**
      * Function to issue a https get request, and process the result
      *
@@ -639,24 +541,6 @@ module.exports = class extends Generator {
     }
 
     /**
-     * Utility function to render a template into a string
-     *
-     * @param {string} source - source
-     * @param {function} callback - callback to take the rendered template as a string
-     * @param {*} generator - reference to the generator
-     * @param {*} options - options object
-     * @param {*} context - context
-     */
-    render(source, callback, generator, options = {}, context) {
-        const _this = generator || this;
-        const _context = context || _this;
-        simlifeUtils.renderContent(source, _this, _context, options, (res) => {
-            callback(res);
-        });
-    }
-
-
-    /**
      * Utility function to copy files.
      *
      * @param {string} source - Original file.
@@ -683,23 +567,15 @@ module.exports = class extends Generator {
      * Compose external blueprint module
      * @param {string} blueprint - name of the blueprint
      * @param {string} subGen - sub generator
-     * @param {any} options - options to pass to blueprint generator
      */
-    composeBlueprint(blueprint, subGen, options = {}) {
+    composeBlueprint(blueprint, subGen) {
         if (blueprint) {
             this.checkBlueprint(blueprint);
-            this.log(`Trying to use blueprint ${blueprint}`);
             try {
-                const finalOptions = Object.assign(
-                    options,
-                    { simlifeContext: this }
-                );
                 this.useBlueprint = true;
-                this.composeExternalModule(
-                    blueprint,
-                    subGen,
-                    finalOptions
-                );
+                this.composeExternalModule(blueprint, subGen, {
+                    simlifeContext: this
+                });
                 return true;
             } catch (e) {
                 this.debug('Error', e);
@@ -727,8 +603,6 @@ module.exports = class extends Generator {
                 }
                 done();
             });
-        } else {
-            done();
         }
     }
 
@@ -766,9 +640,6 @@ module.exports = class extends Generator {
                 if (!semver.satisfies(nodeVersion, nodeFromPackageJson)) {
                     this.warning(`Your NodeJS version is too old (${nodeVersion}). You should use at least NodeJS ${chalk.bold(nodeFromPackageJson)}`);
                 }
-                if (!(process.release || {}).lts) {
-                    this.warning('Your Node version is not LTS (Long Term Support), use it at your own risk! Simlife does not support non-LTS releases, so if you encounter a bug, please use a LTS version first.');
-                }
             }
             done();
         });
@@ -792,7 +663,7 @@ module.exports = class extends Generator {
     checkGitConnection() {
         if (!this.gitInstalled) return;
         const done = this.async();
-        exec('git ls-remote git://github.com/simlife/simlife-bot.git HEAD', { timeout: 5000 }, (error) => {
+        exec('git ls-remote git://github.com/simlife/simlife-bot.git HEAD', { timeout: 15000 }, (error) => {
             if (error) {
                 this.warning(`Failed to connect to "git://github.com"
 1. Check your Internet connection.
@@ -844,19 +715,20 @@ module.exports = class extends Generator {
                     variableName += 'Collection';
                 }
                 const relationshipFieldName = `this.${entityInstance}.${relationship.relationshipFieldName}`;
-                const relationshipFieldNameIdCheck = dto === 'no'
-                    ? `!${relationshipFieldName} || !${relationshipFieldName}.id`
-                    : `!${relationshipFieldName}Id`;
+                const relationshipFieldNameIdCheck = dto === 'no' ?
+                    `!${relationshipFieldName} || !${relationshipFieldName}.id` :
+                    `!${relationshipFieldName}Id`;
 
-                query = `this.${relationship.otherEntityName}Service
+                query =
+        `this.${relationship.otherEntityName}Service
             .query({filter: '${relationship.otherEntityRelationshipName.toLowerCase()}-is-null'})
-            .subscribe((res: HttpResponse<I${relationship.otherEntityAngularName}[]>) => {
+            .subscribe((res: HttpResponse<${relationship.otherEntityAngularName}[]>) => {
                 if (${relationshipFieldNameIdCheck}) {
                     this.${variableName} = res.body;
                 } else {
                     this.${relationship.otherEntityName}Service
                         .find(${relationshipFieldName}${dto === 'no' ? '.id' : 'Id'})
-                        .subscribe((subRes: HttpResponse<I${relationship.otherEntityAngularName}>) => {
+                        .subscribe((subRes: HttpResponse<${relationship.otherEntityAngularName}>) => {
                             this.${variableName} = [subRes.body].concat(res.body);
                         }, (subRes: HttpErrorResponse) => this.onError(subRes.message));
                 }
@@ -866,12 +738,13 @@ module.exports = class extends Generator {
                 if (variableName === entityInstance) {
                     variableName += 'Collection';
                 }
-                query = `this.${relationship.otherEntityName}Service.query()
-            .subscribe((res: HttpResponse<I${relationship.otherEntityAngularName}[]>) => { this.${variableName} = res.body; }, (res: HttpErrorResponse) => this.onError(res.message));`;
+                query =
+        `this.${relationship.otherEntityName}Service.query()
+            .subscribe((res: HttpResponse<${relationship.otherEntityAngularName}[]>) => { this.${variableName} = res.body; }, (res: HttpErrorResponse) => this.onError(res.message));`;
             }
             if (variableName && !this.contains(queries, query)) {
                 queries.push(query);
-                variables.push(`${variableName}: I${relationship.otherEntityAngularName}[];`);
+                variables.push(`${variableName}: ${relationship.otherEntityAngularName}[];`);
             }
         });
         return {
@@ -879,145 +752,6 @@ module.exports = class extends Generator {
             variables,
             hasManyToMany
         };
-    }
-
-    /**
-     * Generate Entity Client Field Default Values
-     *
-     * @param {Array|Object} fields - array of fields
-     * @returns {Array} defaultVariablesValues
-     */
-    generateEntityClientFieldDefaultValues(fields, clientFramework = 'angularX') {
-        const defaultVariablesValues = {};
-        fields.forEach((field) => {
-            const fieldType = field.fieldType;
-            const fieldName = field.fieldName;
-            if (fieldType === 'Boolean') {
-                if (clientFramework === 'react') {
-                    defaultVariablesValues[fieldName] = `${fieldName}: false,`;
-                } else {
-                    defaultVariablesValues[fieldName] = `this.${fieldName} = false;`;
-                }
-            }
-        });
-        return defaultVariablesValues;
-    }
-
-    /**
-     * Generate Entity Client Field Declarations
-     *
-     * @param {string} pkType - type of primary key
-     * @param {Array|Object} fields - array of fields
-     * @param {Array|Object} relationships - array of relationships
-     * @param {string} dto - dto
-     * @returns variablesWithTypes: Array
-     */
-    generateEntityClientFields(pkType, fields, relationships, dto) {
-        const variablesWithTypes = [];
-        let tsKeyType;
-        if (pkType === 'String') {
-            tsKeyType = 'string';
-        } else {
-            tsKeyType = 'number';
-        }
-        variablesWithTypes.push(`id?: ${tsKeyType}`);
-        fields.forEach((field) => {
-            const fieldType = field.fieldType;
-            const fieldName = field.fieldName;
-            let tsType;
-            if (field.fieldIsEnum) {
-                tsType = fieldType;
-            } else if (fieldType === 'Boolean') {
-                tsType = 'boolean';
-            } else if (['Integer', 'Long', 'Float', 'Double', 'BigDecimal'].includes(fieldType)) {
-                tsType = 'number';
-            } else if (fieldType === 'String' || fieldType === 'UUID') {
-                tsType = 'string';
-            } else if (['LocalDate', 'Instant', 'ZonedDateTime'].includes(fieldType)) {
-                tsType = 'Moment';
-            } else { // (fieldType === 'byte[]' || fieldType === 'ByteBuffer') && fieldTypeBlobContent === 'any' || (fieldType === 'byte[]' || fieldType === 'ByteBuffer') && fieldTypeBlobContent === 'image' || fieldType === 'LocalDate'
-                tsType = 'any';
-                if (['byte[]', 'ByteBuffer'].includes(fieldType) && field.fieldTypeBlobContent !== 'text') {
-                    variablesWithTypes.push(`${fieldName}ContentType?: string`);
-                }
-            }
-            variablesWithTypes.push(`${fieldName}?: ${tsType}`);
-        });
-
-        relationships.forEach((relationship) => {
-            let fieldType;
-            let fieldName;
-            const relationshipType = relationship.relationshipType;
-            if (relationshipType === 'one-to-many' || relationshipType === 'many-to-many') {
-                fieldType = `I${relationship.otherEntityAngularName}[]`;
-                fieldName = relationship.relationshipFieldNamePlural;
-            } else if (dto === 'no') {
-                fieldType = `I${relationship.otherEntityAngularName}`;
-                fieldName = relationship.relationshipFieldName;
-            } else {
-                const relationshipFieldName = relationship.relationshipFieldName;
-                const relationshipFieldNamePlural = relationship.relationshipFieldNamePlural;
-                const relationshipType = relationship.relationshipType;
-                const otherEntityFieldCapitalized = relationship.otherEntityFieldCapitalized;
-                const ownerSide = relationship.ownerSide;
-
-                if (relationshipType === 'many-to-many' && ownerSide === true) {
-                    fieldType = `I${otherEntityFieldCapitalized}[]`;
-                    fieldName = relationshipFieldNamePlural;
-                } else if (relationshipType === 'many-to-one' || (relationshipType === 'one-to-one' && ownerSide === true)) {
-                    if (otherEntityFieldCapitalized !== 'Id' && otherEntityFieldCapitalized !== '') {
-                        fieldType = 'string';
-                        fieldName = `${relationshipFieldName}${otherEntityFieldCapitalized}`;
-                        variablesWithTypes.push(`${fieldName}?: ${fieldType}`);
-                    }
-                    fieldType = 'number';
-                    fieldName = `${relationshipFieldName}Id`;
-                } else {
-                    fieldType = tsKeyType;
-                    fieldName = `${relationship.relationshipFieldName}Id`;
-                }
-            }
-            variablesWithTypes.push(`${fieldName}?: ${fieldType}`);
-        });
-        return variablesWithTypes;
-    }
-
-    /**
-     * Generate Entity Client Imports
-     *
-     * @param {Array|Object} relationships - array of relationships
-     * @param {string} dto - dto
-     * @returns typeImports: Map
-     */
-    generateEntityClientImports(relationships, dto, clientFramework = this.clientFramework) {
-        const typeImports = new Map();
-        relationships.forEach((relationship) => {
-            const relationshipType = relationship.relationshipType;
-            let toBeImported = false;
-            if (relationshipType === 'one-to-many' || relationshipType === 'many-to-many') {
-                toBeImported = true;
-            } else if (dto === 'no') {
-                toBeImported = true;
-            } else {
-                const ownerSide = relationship.ownerSide;
-
-                if (relationshipType === 'many-to-many' && ownerSide === true) {
-                    toBeImported = true;
-                }
-            }
-            if (toBeImported) {
-                const otherEntityAngularName = relationship.otherEntityAngularName;
-                const importType = `I${otherEntityAngularName}`;
-                let importPath;
-                if (otherEntityAngularName === 'User') {
-                    importPath = clientFramework === 'angularX' ? 'app/core/user/user.model' : './user.model';
-                } else {
-                    importPath = clientFramework === 'angularX' ? `app/shared/model/${relationship.otherEntityClientRootFolder}${relationship.otherEntityFileName}.model` : `./${relationship.otherEntityFileName}.model`;
-                }
-                typeImports.set(importType, importPath);
-            }
-        });
-        return typeImports;
     }
 
     /**
@@ -1035,12 +769,12 @@ module.exports = class extends Generator {
      * @returns generated JDL from entities
      */
     generateJDLFromEntities() {
-        const jdl = new jhiCore.JDLObject();
+        const jdl = new simCore.JDLObject();
         try {
             const entities = {};
             this.getExistingEntities().forEach((entity) => { entities[entity.name] = entity.definition; });
-            jhiCore.convertJsonEntitiesToJDL(entities, jdl);
-            jhiCore.convertJsonServerOptionsToJDL({ 'simlife-bot': this.config.getAll() }, jdl);
+            simCore.convertJsonEntitiesToJDL(entities, jdl);
+            simCore.convertJsonServerOptionsToJDL({ 'simlife-bot': this.config.getAll() }, jdl);
         } catch (e) {
             this.log(e.message || e);
             this.error('\nError while parsing entities to JDL\n');
@@ -1053,12 +787,8 @@ module.exports = class extends Generator {
      * @param {string[]} languages
      * @returns generated language options
      */
-    generateLanguageOptions(languages, clientFramework) {
+    generateLanguageOptions(languages) {
         const selectedLangs = this.getAllSupportedLanguageOptions().filter(lang => languages.includes(lang.value));
-        if (clientFramework === 'react') {
-            return selectedLangs.map(lang => `'${lang.value}': { name: '${lang.dispName}'${lang.rtl ? ', rtl: true' : ''} }`);
-        }
-
         return selectedLangs.map(lang => `'${lang.value}': { name: '${lang.dispName}'${lang.rtl ? ', rtl: true' : ''} }`);
     }
 
@@ -1133,6 +863,17 @@ module.exports = class extends Generator {
     }
 
     /**
+     * Rebuild client for Angular1
+     */
+    injectJsFilesToIndex() {
+        const done = this.async();
+        this.log(`\n${chalk.bold.green('Running `gulp inject` to add JavaScript to index.html\n')}`);
+        this.spawnCommand('gulp', ['inject:app']).on('close', () => {
+            done();
+        });
+    }
+
+    /**
      * Rebuild client for Angular
      */
     rebuildClient() {
@@ -1169,64 +910,5 @@ module.exports = class extends Generator {
             return 'String';
         }
         return 'Long';
-    }
-
-    /**
-     * Get a root folder name for entity
-     * @param {string} clientRootFolder
-     * @param {string} entityFileName
-     */
-    getEntityFolderName(clientRootFolder, entityFileName) {
-        if (clientRootFolder) {
-            return `${clientRootFolder}/${entityFileName}`;
-        }
-        return entityFileName;
-    }
-
-    /**
-     * Get a parent folder path addition for entity
-     * @param {string} clientRootFolder
-     */
-    getEntityParentPathAddition(clientRootFolder) {
-        if (clientRootFolder) {
-            return '../';
-        }
-        return '';
-    }
-
-    /**
-     * Register file transforms for client side files
-     * @param {any} generator
-     */
-    registerClientTransforms(generator = this) {
-        if (!generator.skipClient) {
-            // Prettier is clever, it uses correct rules and correct parser according to file extension.
-            const prettierFilter = filter(['src/**/*.{ts,tsx,scss,css}'], { restore: true });
-            // this pipe will pass through (restore) anything that doesn't match typescriptFilter
-            generator.registerTransformStream([
-                prettierFilter,
-                prettierTransform(prettierOptions),
-                prettierFilter.restore
-            ]);
-        }
-    }
-
-    /**
-     * Creates a new config file and binds it to the passed generator.
-     * @param {any} generator
-     */
-    createConfigFromNewConfFile(generator = this) {
-        const storePath = path.join(generator.destinationRoot(), '.yo-rc.json');
-        if (!jhiCore.FileUtils.doesFileExist(storePath)) {
-            return;
-        }
-        const customFs = this.fs;
-        customFs.readJSON = (filePath) => {
-            if (!jhiCore.FileUtils.doesFileExist(filePath)) {
-                return {};
-            }
-            return JSON.parse(fs.readFileSync(filePath, { encoding: 'utf-8' }));
-        };
-        generator.config = new Storage(generator.rootGeneratorName(), customFs, storePath);
     }
 };

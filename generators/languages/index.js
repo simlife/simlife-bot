@@ -1,7 +1,7 @@
 /**
- * Copyright 2018 the original author or authors from the Simlife project.
+ * Copyright 2013-2018 the original author or authors from the Simlife project.
  *
- * This file is part of the Simlife project, see https://www.simlife.io/
+ * This file is part of the Simlife project, see http://www.simlife.tech/
  * for more information.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -60,8 +60,8 @@ module.exports = class extends BaseGenerator {
             this.languages.forEach((language) => {
                 if (!this.isSupportedLanguage(language)) {
                     this.log('\n');
-                    this.error(chalk.red(`Unsupported language "${language}" passed as argument to language generator.`
-                        + `\nSupported languages: ${_.map(
+                    this.error(chalk.red(`Unsupported language "${language}" passed as argument to language generator.` +
+                        `\nSupported languages: ${_.map(
                             this.getAllSupportedLanguageOptions(),
                             o => `\n  ${_.padEnd(o.value, 5)} (${o.name})`
                         ).join('')}`));
@@ -92,9 +92,9 @@ module.exports = class extends BaseGenerator {
         this.messageBroker = this.config.get('messageBroker') === 'no' ? false : this.config.get('messageBroker');
         this.env.options.appPath = this.config.get('appPath') || constants.CLIENT_MAIN_SRC_DIR;
         this.enableTranslation = this.config.get('enableTranslation');
+        this.enableSocialSignIn = this.config.get('enableSocialSignIn');
         this.currentLanguages = this.config.get('languages');
         this.clientFramework = this.config.get('clientFramework');
-        this.serviceDiscoveryType = this.config.get('serviceDiscoveryType') === 'no' ? false : this.config.get('serviceDiscoveryType');
         // Make dist dir available in templates
         if (this.config.get('buildTool') === 'maven') {
             this.BUILD_DIR = 'target/';
@@ -157,6 +157,9 @@ module.exports = class extends BaseGenerator {
                 if (configOptions.nativeLanguage) {
                     this.nativeLanguage = configOptions.nativeLanguage;
                 }
+                if (configOptions.enableSocialSignIn !== undefined) {
+                    this.enableSocialSignIn = configOptions.enableSocialSignIn;
+                }
                 if (configOptions.skipClient) {
                     this.skipClient = configOptions.skipClient;
                 }
@@ -170,8 +173,7 @@ module.exports = class extends BaseGenerator {
 
             saveConfig() {
                 if (this.enableTranslation) {
-                    this.languages = _.union(this.currentLanguages, this.languagesToApply);
-                    this.config.set('languages', this.languages);
+                    this.config.set('languages', _.union(this.currentLanguages, this.languagesToApply));
                 }
             }
         };
@@ -189,14 +191,12 @@ module.exports = class extends BaseGenerator {
             insight.track('languages/language', language);
         });
         if (!this.skipClient) {
-            this.updateLanguagesInLanguagePipe(this.languages);
-            this.updateLanguagesInLanguageConstantNG2(this.languages);
-            this.updateLanguagesInWebpack(this.languages);
-            if (this.clientFramework === 'angularX') {
-                this.updateLanguagesInMomentWebpackNgx(this.languages);
-            }
-            if (this.clientFramework === 'react') {
-                this.updateLanguagesInMomentWebpackReact(this.languages);
+            this.updateLanguagesInLanguagePipe(this.config.get('languages'));
+            if (this.clientFramework === 'angular1') {
+                this.updateLanguagesInLanguageConstant(this.config.get('languages'));
+            } else {
+                this.updateLanguagesInLanguageConstantNG2(this.config.get('languages'));
+                this.updateLanguagesInWebpack(this.config.get('languages'));
             }
         }
     }

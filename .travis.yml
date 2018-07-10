@@ -4,7 +4,7 @@ services:
   - docker
 language: node_js
 node_js:
-  - "8.11.3"
+  - "8.9.4"
 jdk:
   - oraclejdk8
 addons:
@@ -31,6 +31,9 @@ env:
     - SPRING_OUTPUT_ANSI_ENABLED=ALWAYS
     - SPRING_JPA_SHOW_SQL=false
 
+    # if SIMLIFE_DEPENDENCIES_BRANCH value is release, use the release from Maven
+    - SIMLIFE_DEPENDENCIES_REPO=https://github.com/simlife/simlife-dependencies.git
+    - SIMLIFE_DEPENDENCIES_BRANCH=release
     # if SIMLIFE_LIB_BRANCH value is release, use the release from Maven
     - SIMLIFE_LIB_REPO=https://github.com/simlife/simlife.git
     - SIMLIFE_LIB_BRANCH=release
@@ -43,18 +46,17 @@ env:
     - SIMLIFE=ngx-psql-es-noi18n PROFILE=prod PROTRACTOR=1
     - SIMLIFE=ngx-gradle-fr PROFILE=prod PROTRACTOR=1
     - SIMLIFE=ngx-mariadb-oauth2-sass-infinispan PROTRACTOR=1
-    - SIMLIFE=ngx-h2mem-ws-nol2
+    - SIMLIFE=ngx-h2mem-social-ws-nol2
     - SIMLIFE=ngx-mongodb-kafka-cucumber
     - SIMLIFE=ngx-session-cassandra-fr
     - SIMLIFE=ngx-couchbase
-    - SIMLIFE=react-default PROFILE=prod PROTRACTOR=1
-    - SIMLIFE=react-noi18n-es-ws-gradle-session PROTRACTOR=1
     - SIMLIFE=ms-ngx-gateway-eureka
-    - SIMLIFE=ms-ngx-gateway-eureka-oauth2 PROTRACTOR=1
     - SIMLIFE=ms-ngx-gateway-consul
     - SIMLIFE=ms-ngx-gateway-uaa
     - SIMLIFE=ms-micro-eureka
     - SIMLIFE=ms-micro-consul
+    - SIMLIFE=react-default
+    - SIMLIFE=ng1-default
 
 before_install:
   - jdk_switcher use oraclejdk8
@@ -70,21 +72,16 @@ before_install:
   - curl -o- -L https://yarnpkg.com/install.sh | bash
   - export PATH=$HOME/.yarn/bin:$PATH
   - yarn -v
+  - yarn global add yo bower gulp-cli
 install:
   - $SIMLIFE_SCRIPTS/00-install-simlife.sh
-  # generate project and entities
   - $SIMLIFE_SCRIPTS/01-generate-entities.sh
   - $SIMLIFE_SCRIPTS/02-generate-project.sh
-  - $SIMLIFE_SCRIPTS/03-replace-version-generated-project.sh
 script:
   - $SIMLIFE_SCRIPTS/03-docker-compose.sh
-  - travis_wait $SIMLIFE_SCRIPTS/04-tests.sh
+  - $SIMLIFE_SCRIPTS/04-tests.sh
   - $SIMLIFE_SCRIPTS/05-run.sh
   - $SIMLIFE_SCRIPTS/06-sonar.sh
-before_cache:
-  - rm -rf $HOME/.m2/repository/io/github/simlife/simlife-framework/
-  - rm -rf $HOME/.m2/repository/io/github/simlife/simlife-dependencies/
-  - rm -rf $HOME/.m2/repository/io/github/simlife/simlife-parent/
 notifications:
   webhooks:
     urls:

@@ -11,12 +11,14 @@ describe('Generator Base Private', () => {
         it('should produce correct output without margin', () => {
             const entityFolderName = 'entityFolderName';
             const entityFileName = 'entityFileName';
-            const content = `|export * from './${entityFolderName}/${entityFileName}-update.component';
+            const content =
+                `|export * from './${entityFolderName}/${entityFileName}-dialog.component';
                  |export * from './${entityFolderName}/${entityFileName}-delete-dialog.component';
                  |export * from './${entityFolderName}/${entityFileName}-detail.component';
                  |export * from './${entityFolderName}/${entityFileName}.component';
                  |export * from './${entityFolderName}/${entityFileName}.state';`;
-            const out = `export * from './entityFolderName/entityFileName-update.component';
+            const out =
+`export * from './entityFolderName/entityFileName-dialog.component';
 export * from './entityFolderName/entityFileName-delete-dialog.component';
 export * from './entityFolderName/entityFileName-detail.component';
 export * from './entityFolderName/entityFileName.component';
@@ -27,13 +29,15 @@ export * from './entityFolderName/entityFileName.state';`;
             const routerName = 'routerName';
             const enableTranslation = true;
             const glyphiconName = 'glyphiconName';
-            const content = `|<li ui-sref-active="active">
+            const content =
+                `|<li ui-sref-active="active">
                  |    <a ui-sref="${routerName}" ng-click="vm.collapseNavbar()">
                  |        <span class="glyphicon glyphicon-${glyphiconName}"></span>&nbsp;
                  |        <span ${enableTranslation ? `data-translate="global.menu.${routerName}"` : ''}>${routerName}</span>
                  |    </a>
                  |</li>`;
-            const out = `<li ui-sref-active="active">
+            const out =
+`<li ui-sref-active="active">
     <a ui-sref="routerName" ng-click="vm.collapseNavbar()">
         <span class="glyphicon glyphicon-glyphiconName"></span>&nbsp;
         <span data-translate="global.menu.routerName">routerName</span>
@@ -57,45 +61,6 @@ export * from './entityFolderName/entityFileName.state';`;
         describe('when called with cassandra', () => {
             it('return cassandra', () => {
                 expect(BaseGenerator.getDBTypeFromDBValue('cassandra')).to.equal('cassandra');
-            });
-        });
-    });
-
-    describe('generateEntityClientImports', () => {
-        const relationships = [
-            {
-                otherEntityAngularName: 'User'
-            },
-            {
-                otherEntityAngularName: 'AnEntity'
-            }
-        ];
-        describe('when called with dto option', () => {
-            it('return an empty Map', () => {
-                const imports = BaseGenerator.generateEntityClientImports(relationships, 'yes');
-                expect(imports.size).to.eql(0);
-            });
-        });
-        describe('when called with 2 distinct relationships without dto option', () => {
-            it('return a Map with 2 imports', () => {
-                const imports = BaseGenerator.generateEntityClientImports(relationships, 'no');
-                expect(imports).to.have.all.keys('IUser', 'IAnEntity');
-                expect(imports.size).to.eql(relationships.length);
-            });
-        });
-        describe('when called with 2 identical relationships without dto option', () => {
-            const relationships = [
-                {
-                    otherEntityAngularName: 'User'
-                },
-                {
-                    otherEntityAngularName: 'User'
-                }
-            ];
-            it('return a Map with 1 import', () => {
-                const imports = BaseGenerator.generateEntityClientImports(relationships, 'no');
-                expect(imports).to.have.key('IUser');
-                expect(imports.size).to.eql(1);
             });
         });
     });
@@ -177,54 +142,7 @@ export * from './entityFolderName/entityFileName.state';`;
             describe('when having quotes', () => {
                 it('formats the text to make the string valid', () => {
                     // eslint-disable-next-line quotes
-                    expect(BaseGenerator.formatAsApiDescription('Simlife is "the" best')).to.equal('Simlife is \\"the\\" best');
-                });
-            });
-        });
-    });
-
-    describe('formatAsLiquibaseRemarks', () => {
-        describe('when formatting a nil text', () => {
-            it('returns it', () => {
-                expect(BaseGenerator.formatAsLiquibaseRemarks()).to.equal(undefined);
-            });
-        });
-        describe('when formatting an empty text', () => {
-            it('returns it', () => {
-                expect(BaseGenerator.formatAsLiquibaseRemarks('')).to.equal('');
-            });
-        });
-        describe('when formatting normal texts', () => {
-            describe('when having empty lines', () => {
-                it('discards them', () => {
-                    expect(BaseGenerator.formatAsLiquibaseRemarks('First line\n \nSecond line\n\nThird line')).to.equal('First line Second line Third line');
-                });
-            });
-            describe('when having a plain text', () => {
-                it('puts a space before each line', () => {
-                    expect(BaseGenerator.formatAsLiquibaseRemarks('Simlife is\na great generator')).to.equal('Simlife is a great generator');
-                });
-            });
-            describe('when having ampersand', () => {
-                it('formats the text to escape it', () => {
-                    expect(BaseGenerator.formatAsLiquibaseRemarks('Simlife uses Spring & Hibernate')).to.equal('Simlife uses Spring &amp; Hibernate');
-                });
-            });
-            describe('when having quotes', () => {
-                it('formats the text to escape it', () => {
-                    // eslint-disable-next-line quotes
-                    expect(BaseGenerator.formatAsLiquibaseRemarks('Simlife is "the" best')).to.equal('Simlife is &quot;the&quot; best');
-                });
-            });
-            describe('when having apostrophe', () => {
-                it('formats the text to escape it', () => {
-                    // eslint-disable-next-line quotes
-                    expect(BaseGenerator.formatAsLiquibaseRemarks("Simlife is 'the' best")).to.equal("Simlife is &apos;the&apos; best");
-                });
-            });
-            describe('when having HTML tags < and >', () => {
-                it('formats the text to escape it', () => {
-                    expect(BaseGenerator.formatAsLiquibaseRemarks('Not boldy\n<b>boldy</b>')).to.equal('Not boldy&lt;b&gt;boldy&lt;/b&gt;');
+                    expect(BaseGenerator.formatAsApiDescription("Simlife is \"the\" best")).to.equal("Simlife is \"the\" best");
                 });
             });
         });

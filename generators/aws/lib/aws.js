@@ -1,8 +1,7 @@
-const shelljs = require('shelljs');
 const S3 = require('./s3.js');
 const Rds = require('./rds.js');
+const shelljs = require('shelljs');
 const Eb = require('./eb.js');
-const Iam = require('./iam.js');
 
 let Aws;
 let generator;
@@ -40,8 +39,4 @@ AwsFactory.prototype.getRds = function getRds() {
 
 AwsFactory.prototype.getEb = function getEb() {
     return new Eb(Aws, generator);
-};
-
-AwsFactory.prototype.getIam = function getIa() {
-    return new Iam(Aws, generator);
 };

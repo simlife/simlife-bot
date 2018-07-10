@@ -1,7 +1,7 @@
 /**
- * Copyright 2018 the original author or authors from the Simlife project.
+ * Copyright 2013-2018 the original author or authors from the Simlife project.
  *
- * This file is part of the Simlife project, see https://www.simlife.io/
+ * This file is part of the Simlife project, see http://www.simlife.tech/
  * for more information.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -46,8 +46,8 @@ module.exports = class extends BaseGenerator {
                     this.dbName = awsConfig.dbName;
                     this.dbInstanceClass = awsConfig.dbInstanceClass;
 
-                    this.log(chalk.green('This is an existing deployment, using the configuration from your .yo-rc.json file \n'
-                        + 'to deploy your application...\n'));
+                    this.log(chalk.green('This is an existing deployment, using the configuration from your .yo-rc.json file \n' +
+                        'to deploy your application...\n'));
                 }
             },
             checkDatabase() {
@@ -126,11 +126,7 @@ module.exports = class extends BaseGenerator {
 
                 s3.createBucket({ bucket: this.bucketName }, (err, data) => {
                     if (err) {
-                        if (err.message == null) {
-                            this.error(chalk.red(('The S3 bucket could not be created. Are you sure its name is not already used?')));
-                        } else {
-                            this.error(chalk.red(err.message));
-                        }
+                        this.error(chalk.red(err.message));
                     } else {
                         this.log(data.message);
                         cb();
@@ -205,19 +201,6 @@ module.exports = class extends BaseGenerator {
                     } else {
                         this.dbUrl = data.dbUrl;
                         this.log(data.message);
-                        cb();
-                    }
-                });
-            },
-            verifyRoles() {
-                const cb = this.async();
-                this.log();
-                this.log(chalk.bold('Verifying ElasticBeanstalk Roles'));
-                const iam = this.awsFactory.getIam();
-                iam.verifyRoles({}, (err) => {
-                    if (err) {
-                        this.error(chalk.red(err.message));
-                    } else {
                         cb();
                     }
                 });

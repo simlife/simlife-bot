@@ -34,16 +34,15 @@ fi
 cd "$APP_FOLDER"
 if [ -f "mvnw" ]; then
     ./mvnw test \
-        -Dlogging.level.org.zalando=OFF \
-        -Dlogging.level.io.github.simlife=OFF \
-        -Dlogging.level.io.github.simlife.sample=OFF \
-        -Dlogging.level.io.github.simlife.travis=OFF
+        -Dlogging.level.io.github.simlife.sample=ERROR \
+        -Dlogging.level.io.github.simlife.travis=ERROR
 elif [ -f "gradlew" ]; then
     ./gradlew test \
-        -Dlogging.level.org.zalando=OFF \
-        -Dlogging.level.io.github.simlife=OFF \
-        -Dlogging.level.io.github.simlife.sample=OFF \
-        -Dlogging.level.io.github.simlife.travis=OFF
+        -Dlogging.level.io.github.simlife.sample=ERROR \
+        -Dlogging.level.io.github.simlife.travis=ERROR
+fi
+if [ -f "gulpfile.js" ]; then
+    gulp test --no-notification
 fi
 if [ -f "tsconfig.json" ]; then
     yarn test

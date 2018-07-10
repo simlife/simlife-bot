@@ -1,7 +1,7 @@
 /**
- * Copyright 2018 the original author or authors from the Simlife project.
+ * Copyright 2013-2018 the original author or authors from the Simlife project.
  *
- * This file is part of the Simlife project, see https://www.simlife.io/
+ * This file is part of the Simlife project, see http://www.simlife.tech/
  * for more information.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -256,17 +256,15 @@ module.exports = class extends BaseGenerator {
             },
 
             saveConfig() {
-                this.config.set({
-                    appsFolders: this.appsFolders,
-                    directoryPath: this.directoryPath,
-                    monitoring: this.monitoring,
-                    serviceDiscoveryType: this.serviceDiscoveryType,
-                    adminPassword: this.adminPassword,
-                    jwtSecretKey: this.jwtSecretKey,
-                    dockerRepositoryName: this.dockerRepositoryName,
-                    dockerPushCommand: this.dockerPushCommand,
-                    enableRancherLoadBalancing: this.enableRancherLoadBalancing
-                });
+                this.config.set('appsFolders', this.appsFolders);
+                this.config.set('directoryPath', this.directoryPath);
+                this.config.set('monitoring', this.monitoring);
+                this.config.set('serviceDiscoveryType', this.serviceDiscoveryType);
+                this.config.set('adminPassword', this.adminPassword);
+                this.config.set('jwtSecretKey', this.jwtSecretKey);
+                this.config.set('dockerRepositoryName', this.dockerRepositoryName);
+                this.config.set('dockerPushCommand', this.dockerPushCommand);
+                this.config.set('enableRancherLoadBalancing', this.enableRancherLoadBalancing);
             }
         };
     }

@@ -1,7 +1,7 @@
 /**
- * Copyright 2018 the original author or authors from the Simlife project.
+ * Copyright 2013-2018 the original author or authors from the Simlife project.
  *
- * This file is part of the Simlife project, see https://www.simlife.io/
+ * This file is part of the Simlife project, see http://www.simlife.tech/
  * for more information.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,7 +16,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-const jhiCore = require('simlife-core');
+const simCore = require('simlife-core');
 
 module.exports = {
     askForControllerActions
@@ -38,12 +38,12 @@ function askForControllerActions() {
                 validate: (input) => {
                     if (!(/^([a-zA-Z0-9_]*)$/.test(input))) {
                         return 'Your action name cannot contain special characters';
-                    } if (input === '') {
+                    } else if (input === '') {
                         return 'Your action name cannot be empty';
-                    } if (input.charAt(0) === input.charAt(0).toUpperCase()) {
+                    } else if (input.charAt(0) === input.charAt(0).toUpperCase()) {
                         return 'Your action name cannot start with an upper case letter';
-                    } if (jhiCore.isReservedFieldName(input)) {
-                        return 'Your action name cannot contain a Java, Angular or React reserved keyword';
+                    } else if (simCore.isReservedFieldName(input)) {
+                        return 'Your action name cannot contain a Java or Angular reserved keyword';
                     }
 
                     return true;
@@ -96,3 +96,4 @@ function askForControllerActions() {
     const done = this.async();
     askForControllerAction(done);
 }
+

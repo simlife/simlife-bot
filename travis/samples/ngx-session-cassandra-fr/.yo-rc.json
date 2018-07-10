@@ -11,7 +11,6 @@
     "databaseType": "cassandra",
     "devDatabaseType": "cassandra",
     "prodDatabaseType": "cassandra",
-    "reactive": true,
     "searchEngine": false,
     "useSass": false,
     "buildTool": "maven",
@@ -21,6 +20,7 @@
       "en",
       "fr"
     ],
+    "enableSocialSignIn": false,
     "rememberMeKey": "f19f0827c622eb9b81f5227a869ccd44932d78eb",
     "testFrameworks": [
       "gatling"

@@ -1,7 +1,7 @@
 /**
- * Copyright 2018 the original author or authors from the Simlife project.
+ * Copyright 2013-2018 the original author or authors from the Simlife project.
  *
- * This file is part of the Simlife project, see https://www.simlife.io/
+ * This file is part of the Simlife project, see http://www.simlife.tech/
  * for more information.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,7 +16,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 module.exports = {
     writeFiles
 };
@@ -27,80 +26,64 @@ function writeFiles() {
             for (let i = 0; i < this.appConfigs.length; i++) {
                 const appName = this.appConfigs[i].baseName.toLowerCase();
                 this.app = this.appConfigs[i];
-                this.template('deployment.yml.ejs', `${appName}/${appName}-deployment.yml`);
-                this.template('service.yml.ejs', `${appName}/${appName}-service.yml`);
+                this.template('_deployment.yml', `${appName}/${appName}-deployment.yml`);
+                this.template('_service.yml', `${appName}/${appName}-service.yml`);
                 // If we choose microservice with no DB, it is trying to move _no.yml as prodDatabaseType is getting tagged as 'string' type
                 if (this.app.prodDatabaseType !== 'no') {
-                    this.template(`db/${this.app.prodDatabaseType}.yml.ejs`, `${appName}/${appName}-${this.app.prodDatabaseType}.yml`);
+                    this.template(`db/_${this.app.prodDatabaseType}.yml`, `${appName}/${appName}-${this.app.prodDatabaseType}.yml`);
                 }
                 if (this.app.searchEngine === 'elasticsearch') {
-                    this.template('db/elasticsearch.yml.ejs', `${appName}/${appName}-elasticsearch.yml`);
+                    this.template('db/_elasticsearch.yml', `${appName}/${appName}-elasticsearch.yml`);
+                }
+                if (this.app.messageBroker === 'kafka') {
+                    this.template('db/_kafka.yml', `${appName}/${appName}-kafka.yml`);
                 }
                 if ((this.app.applicationType === 'gateway' || this.app.applicationType === 'monolith') && this.kubernetesServiceType === 'Ingress') {
-                    this.template('ingress.yml.ejs', `${appName}/${appName}-ingress.yml`);
+                    this.template('_ingress.yml', `${appName}/${appName}-ingress.yml`);
                 }
-                if (!this.app.serviceDiscoveryType && this.app.authenticationType === 'jwt') {
-                    this.template('secret/jwt-secret.yml.ejs', `${appName}/jwt-secret.yml`);
-                }
-                if (this.monitoring === 'prometheus') {
-                    this.template('monitoring/simlife-prometheus-sm.yml.ejs', `${appName}/${appName}-prometheus-sm.yml`);
-                }
-                if (this.istioRoute === true) {
-                    this.template('istio/destination-policy.yml.ejs', `${appName}/${appName}-deployment-policy.yml`);
-                    this.template('istio/route-rule.yml.ejs', `${appName}/${appName}-route-rule.yml`);
+                if (this.prometheusOperator) {
+                    this.template('_prometheus.yml', `${appName}/${appName}-prometheus.yml`);
                 }
             }
         },
 
         writeReadme() {
-            this.template('README-KUBERNETES.md.ejs', 'README.md');
+            this.template('_README-KUBERNETES.md', 'README.md');
         },
 
         writeNamespace() {
             if (this.kubernetesNamespace !== 'default') {
-                this.template('namespace.yml.ejs', 'namespace.yml');
+                this.template('_namespace.yml', 'namespace.yml');
             }
         },
 
-        writeMessagingBroker() {
-            if (!this.useKafka) return;
-            this.template('messagebroker/kafka.yml.ejs', 'messagebroker/kafka.yml');
-        },
-
-        writeSimlifeConsole() {
-            if (this.monitoring === 'elk') {
-                this.template('console/simlife-elasticsearch.yml.ejs', 'console/simlife-elasticsearch.yml');
-                this.template('console/simlife-logstash.yml.ejs', 'console/simlife-logstash.yml');
-                this.template('console/simlife-console.yml.ejs', 'console/simlife-console.yml');
-                this.template('console/simlife-dashboard-console.yml.ejs', 'console/simlife-dashboard-console.yml');
+        writeJsimlifeConsole() {
+            if (this.simlifeConsole) {
+                this.template('console/_simlife-elasticsearch.yml', 'console/simlife-elasticsearch.yml');
+                this.template('console/_simlife-logstash.yml', 'console/simlife-logstash.yml');
+                this.template('console/_simlife-console.yml', 'console/simlife-console.yml');
+                this.template('console/_simlife-dashboard-console.yml', 'console/simlife-dashboard-console.yml');
                 if (this.composeApplicationType === 'microservice') {
-                    this.template('console/simlife-zipkin.yml.ejs', 'console/simlife-zipkin.yml');
+                    this.template('console/_simlife-zipkin.yml', 'console/simlife-zipkin.yml');
                 }
             }
         },
 
-        writePrometheusGrafanaFiles() {
-            if (this.monitoring === 'prometheus') {
-                this.template('monitoring/simlife-prometheus-crd.yml.ejs', 'monitoring/simlife-prometheus-crd.yml');
-                this.template('monitoring/simlife-prometheus-cr.yml.ejs', 'monitoring/simlife-prometheus-cr.yml');
-                this.template('monitoring/simlife-grafana.yml.ejs', 'monitoring/simlife-grafana.yml');
-                this.template('monitoring/simlife-grafana-dashboard.yml.ejs', 'monitoring/simlife-grafana-dashboard.yml');
+        writePrometheusTpr() {
+            if (this.prometheusOperator) {
+                this.template('_prometheus-tpr.yml', 'prometheus-tpr.yml');
             }
         },
 
         writeRegistryFiles() {
             if (this.serviceDiscoveryType === 'eureka') {
-                this.template('registry/simlife-registry.yml.ejs', 'registry/simlife-registry.yml');
-                this.template('registry/application-configmap.yml.ejs', 'registry/application-configmap.yml');
+                this.template('registry/_simlife-registry.yml', 'registry/simlife-registry.yml');
+                this.template('registry/_application-configmap.yml', 'registry/application-configmap.yml');
             } else if (this.serviceDiscoveryType === 'consul') {
-                this.template('registry/consul.yml.ejs', 'registry/consul.yml');
-                this.template('registry/consul-config-loader.yml.ejs', 'registry/consul-config-loader.yml');
-                this.template('registry/application-configmap.yml.ejs', 'registry/application-configmap.yml');
+                this.template('registry/_consul.yml', 'registry/consul.yml');
+                this.template('registry/_consul-config-loader.yml', 'registry/consul-config-loader.yml');
+                this.template('registry/_application-configmap.yml', 'registry/application-configmap.yml');
             }
-        },
-
-        writeConfigRunFile() {
-            this.template('kubectl-apply.sh.ejs', 'kubectl-apply.sh');
         }
     };
 }

@@ -1,7 +1,7 @@
 /**
- * Copyright 2018 the original author or authors from the Simlife project.
+ * Copyright 2013-2018 the original author or authors from the Simlife project.
  *
- * This file is part of the Simlife project, see https://www.simlife.io/
+ * This file is part of the Simlife project, see http://www.simlife.tech/
  * for more information.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -56,7 +56,6 @@ module.exports = class extends BaseGenerator {
         this.enableHibernateCache = this.config.get('enableHibernateCache') || (this.config.get('hibernateCache') !== undefined && this.config.get('hibernateCache') !== 'no');
         this.databaseType = this.config.get('databaseType');
         this.prodDatabaseType = this.config.get('prodDatabaseType');
-        this.searchEngine = this.config.get('searchEngine');
         this.angularAppName = this.getAngularAppName();
         this.buildTool = this.config.get('buildTool');
         this.applicationType = this.config.get('applicationType');
@@ -154,8 +153,8 @@ module.exports = class extends BaseGenerator {
 
                 exec('heroku --version', (err) => {
                     if (err) {
-                        this.log.error('You don\'t have the Heroku CLI installed. '
-                            + 'Download it from https://cli.heroku.com/');
+                        this.log.error('You don\'t have the Heroku Toolbelt installed. ' +
+                            'Download it from https://toolbelt.heroku.com/');
                         this.abort = true;
                     }
                     done();
@@ -306,26 +305,6 @@ module.exports = class extends BaseGenerator {
                 if (this.abort) return;
                 const done = this.async();
 
-                const addonCreateCallback = (addon, err, stdout, stderr) => {
-                    if (err) {
-                        const verifyAccountUrl = 'https://heroku.com/verify';
-                        if (_.includes(err, verifyAccountUrl)) {
-                            this.abort = true;
-                            this.log.error(`Account must be verified to use addons. Please go to: ${verifyAccountUrl}`);
-                            this.log.error(err);
-                        } else {
-                            this.log(`No new ${addon} addon created`);
-                        }
-                    } else {
-                        this.log(`Created ${addon} addon`);
-                    }
-                };
-
-                this.log(chalk.bold('\nProvisioning addons'));
-                if (this.searchEngine === 'elasticsearch') {
-                    exec(`heroku addons:create searchbox:starter --as SEARCHBOX --app ${this.herokuAppName}`, addonCreateCallback.bind(this, 'Elasticsearch'));
-                }
-
                 let dbAddOn = '';
                 if (this.prodDatabaseType === 'postgresql') {
                     dbAddOn = 'heroku-postgresql --as DATABASE';
@@ -336,12 +315,23 @@ module.exports = class extends BaseGenerator {
                 } else if (this.prodDatabaseType === 'mongodb') {
                     dbAddOn = 'mongolab:sandbox --as MONGODB';
                 } else {
-                    done();
                     return;
                 }
 
+                this.log(chalk.bold('\nProvisioning addons'));
                 exec(`heroku addons:create ${dbAddOn} --app ${this.herokuAppName}`, (err, stdout, stderr) => {
-                    addonCreateCallback('Database', err, stdout, stderr);
+                    if (err) {
+                        const verifyAccountUrl = 'https://heroku.com/verify';
+                        if (_.includes(err, verifyAccountUrl)) {
+                            this.abort = true;
+                            this.log.error(`Account must be verified to use addons. Please go to: ${verifyAccountUrl}`);
+                            this.log.error(err);
+                        } else {
+                            this.log('No new addons created');
+                        }
+                    } else {
+                        this.log(`Created ${dbAddOn}`);
+                    }
                     done();
                 });
             },
@@ -354,25 +344,13 @@ module.exports = class extends BaseGenerator {
                     const prompts = [
                         {
                             type: 'input',
-                            name: 'herokuSimlifeRegistryApp',
-                            message: 'What is the name of your Simlife Registry Heroku app?'
-                        },
-                        {
-                            type: 'input',
-                            name: 'herokuSimlifeRegistryUsername',
-                            message: 'What is your Simlife Registry username?',
-                            default: 'admin'
-                        },
-                        {
-                            type: 'input',
-                            name: 'herokuSimlifeRegistryPassword',
-                            message: 'What is your Simlife Registry password?'
+                            name: 'herokuSimlifeRegistry',
+                            message: 'What is the URL of your Simlife Registry?'
                         }];
 
                     this.log('');
                     this.prompt(prompts).then((props) => {
-                        const herokuSimlifeRegistry = `https://${props.herokuSimlifeRegistryUsername}:${props.herokuSimlifeRegistryPassword}@${props.herokuSimlifeRegistryApp}.herokuapp.com`;
-                        const configSetCmd = `heroku config:set SIMLIFE_REGISTRY_URL=${herokuSimlifeRegistry} --app ${this.herokuAppName}`;
+                        const configSetCmd = `heroku config:set SIMLIFE_REGISTRY_URL=${props.herokuSimlifeRegistry} --app ${this.herokuAppName}`;
                         const child = exec(configSetCmd, (err, stdout, stderr) => {
                             if (err) {
                                 this.abort = true;
@@ -398,11 +376,11 @@ module.exports = class extends BaseGenerator {
                 const done = this.async();
                 this.log(chalk.bold('\nCreating Heroku deployment files'));
 
-                this.template('bootstrap-heroku.yml.ejs', `${constants.SERVER_MAIN_RES_DIR}/config/bootstrap-heroku.yml`);
-                this.template('application-heroku.yml.ejs', `${constants.SERVER_MAIN_RES_DIR}/config/application-heroku.yml`);
-                this.template('Procfile.ejs', 'Procfile');
+                this.template('_bootstrap-heroku.yml', `${constants.SERVER_MAIN_RES_DIR}/config/bootstrap-heroku.yml`);
+                this.template('_application-heroku.yml', `${constants.SERVER_MAIN_RES_DIR}/config/application-heroku.yml`);
+                this.template('_Procfile', 'Procfile');
                 if (this.buildTool === 'gradle') {
-                    this.template('heroku.gradle.ejs', 'gradle/heroku.gradle');
+                    this.template('_heroku.gradle', 'gradle/heroku.gradle');
                 }
 
                 this.conflicter.resolve((err) => {
@@ -428,7 +406,7 @@ module.exports = class extends BaseGenerator {
 
             addHerokuMavenProfile() {
                 if (this.buildTool === 'maven') {
-                    fs.readFile(path.join(__dirname, 'templates', 'pom-profile.xml.ejs'), (err, profile) => {
+                    fs.readFile(path.join(__dirname, 'templates', '_pom-profile.xml'), (err, profile) => {
                         this.addMavenProfile('heroku', `            ${profile.toString().trim()}`);
                     });
                 }
@@ -460,7 +438,8 @@ module.exports = class extends BaseGenerator {
                 this.buildCmd = child.buildCmd;
 
                 child.stdout.on('data', (data) => {
-                    process.stdout.write(data.toString());
+                    const line = data.toString().trim();
+                    if (line.length !== 0) this.log(line);
                 });
             },
 
@@ -498,7 +477,7 @@ module.exports = class extends BaseGenerator {
                                     let configVars = 'MAVEN_CUSTOM_OPTS="-Pprod,heroku -DskipTests" ';
                                     if (this.buildTool === 'gradle') {
                                         buildpack = 'heroku/gradle';
-                                        configVars = 'GRADLE_TASK="stage -Pprod" ';
+                                        configVars = '';
                                     }
                                     this.log(chalk.bold('\nConfiguring Heroku'));
                                     exec(`heroku config:set NPM_CONFIG_PRODUCTION="false" ${configVars}--app ${this.herokuAppName}`, (err, stdout, stderr) => {

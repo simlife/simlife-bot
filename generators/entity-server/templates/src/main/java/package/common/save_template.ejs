@@ -1,7 +1,7 @@
 <%#
- Copyright 2018 the original author or authors from the Simlife project.
+ Copyright 2013-2018 the original author or authors from the Simlife project.
 
- This file is part of the Simlife project, see https://www.simlife.io/
+ This file is part of the Simlife project, see http://www.simlife.tech/
  for more information.
 
  Licensed under the Apache License, Version 2.0 (the "License");
@@ -28,13 +28,9 @@ if (!viaService) {
         resultEntity = entityInstance; %>
         <%= entityClass %> <%= entityInstance %> = <%= dtoToEntity %>(<%= instanceName %>);
         <%= entityInstance %> = <%= entityInstance %>Repository.save(<%= entityInstance %>);
-        <%= returnPrefix %> <%= entityToDto %>(<%= entityInstance %>);
-    <%_ } else { resultEntity = 'result'; _%>
-        <%= returnPrefix %> <%= entityInstance %>Repository.save(<%= entityInstance %>);
-        <%_ } if (searchEngine === 'elasticsearch') { _%>
-        <%= entityInstance %>SearchRepository.save(<%= resultEntity %>);
-            <%_ if (returnDirectly) { _%>
-        return result;
-    <%_ }}} else { _%>
-        <%= returnPrefix %> <%= entityInstance %>Service.save(<%= instanceName %>);
-<%_ } _%>
+        <%= returnPrefix %> <%= entityToDto %>(<%= entityInstance %>);<% } else {
+    resultEntity = 'result'; %>
+        <%= returnPrefix %> <%= entityInstance %>Repository.save(<%= entityInstance %>);<% } if (searchEngine === 'elasticsearch') { %>
+        <%= entityInstance %>SearchRepository.save(<%= resultEntity %>);<% if (returnDirectly) { %>
+        return result;<% }}} else { %>
+        <%= returnPrefix %> <%= entityInstance %>Service.save(<%= instanceName %>);<% } %>

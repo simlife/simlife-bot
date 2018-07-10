@@ -5,6 +5,7 @@ const S3_STANDARD_REGION = 'us-east-1';
 
 let Progressbar;
 
+
 const S3 = module.exports = function S3(Aws, generator) {
     this.Aws = Aws;
     try {
@@ -23,7 +24,7 @@ S3.prototype.createBucket = function createBucket(params, callback) {
         CreateBucketConfiguration: { LocationConstraint: region }
     };
 
-    if (region === S3_STANDARD_REGION) {
+    if (region.toLowerCase() === S3_STANDARD_REGION) {
         s3Params.CreateBucketConfiguration = undefined;
     }
 
@@ -38,7 +39,7 @@ S3.prototype.createBucket = function createBucket(params, callback) {
                 if (err) {
                     error(err.message, callback);
                 } else {
-                    success(`Bucket ${bucket} created successfully`, callback);
+                    success(`Bucket ${bucket} created successful`, callback);
                 }
             });
         } else if (err && err.statusCode === 301) {

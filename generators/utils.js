@@ -1,7 +1,7 @@
 /**
- * Copyright 2018 the original author or authors from the Simlife project.
+ * Copyright 2013-2018 the original author or authors from the Simlife project.
  *
- * This file is part of the Simlife project, see https://www.simlife.io/
+ * This file is part of the Simlife project, see http://www.simlife.tech/
  * for more information.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,6 +18,7 @@
  */
 
 const path = require('path');
+const html = require('html-wiring');
 const shelljs = require('shelljs');
 const ejs = require('ejs');
 const _ = require('lodash');
@@ -36,8 +37,7 @@ module.exports = {
     deepFind,
     getJavadoc,
     buildEnumInfo,
-    copyObjectProps,
-    decodeBase64
+    copyObjectProps
 };
 
 /**
@@ -71,7 +71,6 @@ function replaceContent(args, generator) {
 }
 
 /**
- * Escape regular expressions.
  *
  * @param {string} str string
  * @returns {string} string with regular expressions escaped
@@ -81,7 +80,7 @@ function escapeRegExp(str) {
 }
 
 /**
- * Rewrite using the passed argument object.
+ * rewrite using the passed argument object
  *
  * @param {object} args arguments object (containing splicable, haystack, needle properties) to be used
  * @returns {*} re-written file
@@ -169,9 +168,6 @@ function copyWebResource(source, dest, regex, type, generator, opt = {}, templat
             case 'js':
                 body = replaceTitle(body, generator);
                 break;
-            case 'jsx':
-                body = replaceTranslation(body, generator);
-                break;
             default:
                 break;
             }
@@ -247,53 +243,23 @@ function replacePlaceholders(body, generator) {
 
 /**
  *
- * @param {string} body html body
- * @param {object} generator reference to the generator
- * @returns string with Translate components replaced
- */
-function replaceTranslation(body, generator) {
-    const replaceRegex = (re, defultReplaceText) => {
-        let match;
-        while ((match = re.exec(body)) !== null) { // eslint-disable-line no-cond-assign
-            // match is now the next match, in array form and our key is at index 2, index 1 is replace target.
-            const key = match[2];
-            const target = match[1];
-            const jsonData = geti18nJson(key, generator);
-            let keyValue = jsonData !== undefined ? deepFind(jsonData, key) : undefined;
-            if (!keyValue) {
-                keyValue = deepFind(jsonData, key, true); // dirty fix to get placeholder as it is not in proper json format, name has a dot in it. Assuming that all placeholders are in similar format
-            }
-
-            body = body.replace(target, keyValue !== undefined ? `"${keyValue}"` : defultReplaceText);
-        }
-    };
-
-    replaceRegex(/(\{translate\('([a-zA-Z0-9.\-_]+)'(, ?null, ?'.*')?\)\})/g, '""');
-    replaceRegex(/(translate\(\s*'([a-zA-Z0-9.\-_]+)'(,\s*(null|\{.*\}),?\s*('.*')?\s*)?\))/g, '\'\'');
-
-    return body;
-}
-
-/**
- *
  * @param key i18n key
  * @param {object} generator reference to the generator
  * @returns parsed json file
  */
 function geti18nJson(key, generator) {
     const i18nDirectory = `${LANGUAGES_MAIN_SRC_DIR}i18n/en/`;
-    let name = _.kebabCase(key.split('.')[0]);
-    if (['entity', 'error', 'footer'].includes(name)) {
-        name = 'global';
-    }
+    const name = _.kebabCase(key.split('.')[0]);
     let filename = `${i18nDirectory + name}.json`;
     let render;
+
     if (!shelljs.test('-f', path.join(generator.sourceRoot(), filename))) {
-        filename = `${i18nDirectory}${name}.json.ejs`;
+        filename = `${i18nDirectory}_${name}.json`;
         render = true;
     }
     try {
-        let file = generator.fs.read(path.join(generator.sourceRoot(), filename));
+        let file = html.readFileAsString(path.join(generator.sourceRoot(), filename));
+
         file = render ? ejs.render(file, generator, {}) : file;
         file = JSON.parse(file);
         return file;
@@ -356,7 +322,7 @@ function getJavadoc(text, indentSize) {
  * @param {string} angularAppName
  * @param {string} packageName
  */
-function buildEnumInfo(field, angularAppName, packageName, clientRootFolder) {
+function buildEnumInfo(field, angularAppName, packageName) {
     const fieldType = field.fieldType;
     field.enumInstance = _.lowerFirst(fieldType);
     const enumInfo = {
@@ -365,8 +331,7 @@ function buildEnumInfo(field, angularAppName, packageName, clientRootFolder) {
         enumInstance: field.enumInstance,
         enums: field.fieldValues.replace(/\s/g, '').split(','),
         angularAppName,
-        packageName,
-        clientRootFolder: clientRootFolder ? `${clientRootFolder}-` : '',
+        packageName
     };
     return enumInfo;
 }
@@ -378,13 +343,4 @@ function buildEnumInfo(field, angularAppName, packageName, clientRootFolder) {
  */
 function copyObjectProps(toObj, fromObj) {
     Object.assign(toObj, fromObj);
-}
-
-/**
- * Decode the given string from base64 to said encoding.
- * @param string the base64 string to decode
- * @param encoding the encoding to decode into. default to 'utf-8'
- */
-function decodeBase64(string, encoding = 'utf-8') {
-    return Buffer.from(string, 'base64').toString(encoding);
 }

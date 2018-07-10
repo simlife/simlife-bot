@@ -1,7 +1,7 @@
 /**
- * Copyright 2018 the original author or authors from the Simlife project.
+ * Copyright 2013-2018 the original author or authors from the Simlife project.
  *
- * This file is part of the Simlife project, see https://www.simlife.io/
+ * This file is part of the Simlife project, see http://www.simlife.tech/
  * for more information.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -21,8 +21,8 @@ const chalk = require('chalk');
 const _ = require('lodash');
 const shelljs = require('shelljs');
 const pluralize = require('pluralize');
-const jhiCore = require('simlife-core');
 const prompts = require('./prompts');
+const simCore = require('simlife-core');
 const BaseGenerator = require('../generator-base');
 const constants = require('../generator-constants');
 
@@ -62,23 +62,9 @@ module.exports = class extends BaseGenerator {
 
         // This adds support for a `--angular-suffix` flag
         this.option('angular-suffix', {
-            desc: 'Use a suffix to generate Angular routes and files, to avoid name clashes',
+            desc: 'Use a suffix to generate AngularJS routes and files, to avoid name clashes',
             type: String,
             defaults: ''
-        });
-
-        // This adds support for a `--client-root-folder` flag
-        this.option('client-root-folder', {
-            desc: 'Use a root folder name for entities on client side. By default its empty for monoliths and name of the microservice for gateways',
-            type: String,
-            defaults: ''
-        });
-
-        // This adds support for a `--skip-ui-grouping` flag
-        this.option('skip-ui-grouping', {
-            desc: 'Disables the UI grouping behaviour for entity client side code',
-            type: Boolean,
-            defaults: false
         });
 
         // This adds support for a `--skip-server` flag
@@ -109,58 +95,40 @@ module.exports = class extends BaseGenerator {
         });
 
         this.context = {};
-
         this.setupEntityOptions(this, this, this.context);
-        this.registerClientTransforms();
         const blueprint = this.config.get('blueprint');
-        if (!opts.fromBlueprint) {
-            // use global variable since getters dont have access to instance property
-            useBlueprint = this.composeBlueprint(
-                blueprint,
-                'entity',
-                {
-                    'skip-install': this.options['skip-install'],
-                    force: this.options.force,
-                    arguments: [this.context.name]
-                }
-            );
-        } else {
-            useBlueprint = false;
-        }
+        useBlueprint = this.composeBlueprint(blueprint, 'entity'); // use global variable since getters dont have access to instance property
     }
 
-    // Public API method used by the getter and also by Blueprints
-    _initializing() {
+    get initializing() {
+        if (useBlueprint) return;
         return {
             getConfig() {
                 const context = this.context;
-                const configuration = this.getAllSimlifeConfig(this, true);
                 context.useConfigurationFile = false;
-                this.env.options.appPath = configuration.get('appPath') || constants.CLIENT_MAIN_SRC_DIR;
+                this.env.options.appPath = this.config.get('appPath') || constants.CLIENT_MAIN_SRC_DIR;
                 context.options = this.options;
-                context.baseName = configuration.get('baseName');
-                context.capitalizedBaseName = _.upperFirst(context.baseName);
-                context.packageName = configuration.get('packageName');
-                context.applicationType = configuration.get('applicationType');
-                context.packageFolder = configuration.get('packageFolder');
-                context.authenticationType = configuration.get('authenticationType');
-                context.cacheProvider = configuration.get('cacheProvider') || configuration.get('hibernateCache') || 'no';
-                context.enableHibernateCache = configuration.get('enableHibernateCache') || (configuration.get('hibernateCache') !== undefined && configuration.get('hibernateCache') !== 'no');
-                context.websocket = configuration.get('websocket') === 'no' ? false : configuration.get('websocket');
-                context.databaseType = configuration.get('databaseType') || this.getDBTypeFromDBValue(this.options.db);
-                context.prodDatabaseType = configuration.get('prodDatabaseType') || this.options.db;
-                context.devDatabaseType = configuration.get('devDatabaseType') || this.options.db;
-                context.searchEngine = configuration.get('searchEngine');
-                context.messageBroker = configuration.get('messageBroker') === 'no' ? false : configuration.get('messageBroker');
-                context.enableTranslation = configuration.get('enableTranslation');
-                context.nativeLanguage = configuration.get('nativeLanguage');
-                context.languages = configuration.get('languages');
-                context.buildTool = configuration.get('buildTool');
-                context.simPrefix = configuration.get('simPrefix');
-                context.skipCheckLengthOfIdentifier = configuration.get('skipCheckLengthOfIdentifier');
+                context.baseName = this.config.get('baseName');
+                context.packageName = this.config.get('packageName');
+                context.applicationType = this.config.get('applicationType');
+                context.packageFolder = this.config.get('packageFolder');
+                context.authenticationType = this.config.get('authenticationType');
+                context.cacheProvider = this.config.get('cacheProvider') || this.config.get('hibernateCache') || 'no';
+                context.enableHibernateCache = this.config.get('enableHibernateCache') || (this.config.get('hibernateCache') !== undefined && this.config.get('hibernateCache') !== 'no');
+                context.websocket = this.config.get('websocket') === 'no' ? false : this.config.get('websocket');
+                context.databaseType = this.config.get('databaseType') || this.getDBTypeFromDBValue(this.options.db);
+                context.prodDatabaseType = this.config.get('prodDatabaseType') || this.options.db;
+                context.devDatabaseType = this.config.get('devDatabaseType') || this.options.db;
+                context.searchEngine = this.config.get('searchEngine') === 'no' ? false : this.config.get('searchEngine');
+                context.messageBroker = this.config.get('messageBroker') === 'no' ? false : this.config.get('messageBroker');
+                context.enableTranslation = this.config.get('enableTranslation');
+                context.nativeLanguage = this.config.get('nativeLanguage');
+                context.languages = this.config.get('languages');
+                context.buildTool = this.config.get('buildTool');
+                context.simPrefix = this.config.get('simPrefix');
                 context.simPrefixDashed = _.kebabCase(context.simPrefix);
                 context.simTablePrefix = this.getTableName(context.simPrefix);
-                context.testFrameworks = configuration.get('testFrameworks');
+                context.testFrameworks = this.config.get('testFrameworks');
                 // backward compatibility on testing frameworks
                 if (context.testFrameworks === undefined) {
                     context.testFrameworks = ['gatling'];
@@ -169,11 +137,11 @@ module.exports = class extends BaseGenerator {
                 context.gatlingTests = context.testFrameworks.includes('gatling');
                 context.cucumberTests = context.testFrameworks.includes('cucumber');
 
-                context.clientFramework = configuration.get('clientFramework');
+                context.clientFramework = this.config.get('clientFramework');
                 if (!context.clientFramework) {
-                    context.clientFramework = 'angularX';
+                    context.clientFramework = 'angular1';
                 }
-                context.clientPackageManager = configuration.get('clientPackageManager');
+                context.clientPackageManager = this.config.get('clientPackageManager');
                 if (!context.clientPackageManager) {
                     if (context.useYarn) {
                         context.clientPackageManager = 'yarn';
@@ -182,8 +150,8 @@ module.exports = class extends BaseGenerator {
                     }
                 }
 
-                context.skipClient = context.applicationType === 'microservice' || this.options['skip-client'] || configuration.get('skipClient');
-                context.skipServer = this.options['skip-server'] || configuration.get('skipServer');
+                context.skipClient = context.applicationType === 'microservice' || this.options['skip-client'] || this.config.get('skipClient');
+                context.skipServer = this.options['skip-server'] || this.config.get('skipServer');
 
                 context.angularAppName = this.getAngularAppName(context.baseName);
                 context.angularXAppName = this.getAngularXAppName(context.baseName);
@@ -195,6 +163,7 @@ module.exports = class extends BaseGenerator {
                 if (shelljs.test('-f', context.filename)) {
                     this.log(chalk.green(`\nFound the ${context.filename} configuration file, entity can be automatically generated!\n`));
                     context.useConfigurationFile = true;
+                    context.fromPath = context.filename;
                 }
             },
 
@@ -222,7 +191,7 @@ module.exports = class extends BaseGenerator {
                     this.error(chalk.red('The entity name cannot be empty'));
                 } else if (entityName.indexOf('Detail', entityName.length - 'Detail'.length) !== -1) {
                     this.error(chalk.red('The entity name cannot end with \'Detail\''));
-                } else if (!this.context.skipServer && jhiCore.isReservedClassName(entityName)) {
+                } else if (!this.context.skipServer && simCore.isReservedClassName(entityName)) {
                     this.error(chalk.red('The entity name cannot contain a Java or Simlife reserved keyword'));
                 }
             },
@@ -245,7 +214,7 @@ module.exports = class extends BaseGenerator {
                 } else {
                     // existing entity reading values from file
                     this.log(`\nThe entity ${entityName} is being updated.\n`);
-                    this.loadEntityJson(context.filename);
+                    this.loadEntityJson();
                 }
             },
 
@@ -254,32 +223,26 @@ module.exports = class extends BaseGenerator {
                 const prodDatabaseType = context.prodDatabaseType;
                 const entityTableName = context.entityTableName;
                 const simTablePrefix = context.simTablePrefix;
-                const skipCheckLengthOfIdentifier = context.skipCheckLengthOfIdentifier;
                 const instructions = `You can specify a different table name in your JDL file or change it in .simlife/${context.name}.json file and then run again 'simlife entity ${context.name}.'`;
 
                 if (!(/^([a-zA-Z0-9_]*)$/.test(entityTableName))) {
                     this.error(chalk.red(`The table name cannot contain special characters.\n${instructions}`));
                 } else if (entityTableName === '') {
                     this.error(chalk.red('The table name cannot be empty'));
-                } else if (jhiCore.isReservedTableName(entityTableName, prodDatabaseType)) {
+                } else if (simCore.isReservedTableName(entityTableName, prodDatabaseType)) {
                     this.warning(chalk.red(`The table name cannot contain the '${entityTableName.toUpperCase()}' reserved keyword, so it will be prefixed with '${simTablePrefix}_'.\n${instructions}`));
                     context.entityTableName = `${simTablePrefix}_${entityTableName}`;
-                } else if (prodDatabaseType === 'oracle' && entityTableName.length > 26 && !skipCheckLengthOfIdentifier) {
+                } else if (prodDatabaseType === 'oracle' && entityTableName.length > 26) {
                     this.error(chalk.red(`The table name is too long for Oracle, try a shorter name.\n${instructions}`));
-                } else if (prodDatabaseType === 'oracle' && entityTableName.length > 14 && !skipCheckLengthOfIdentifier) {
+                } else if (prodDatabaseType === 'oracle' && entityTableName.length > 14) {
                     this.warning(`The table name is long for Oracle, long table names can cause issues when used to create constraint names and join table names.\n${instructions}`);
                 }
             }
         };
     }
 
-    get initializing() {
+    get prompting() {
         if (useBlueprint) return;
-        return this._initializing();
-    }
-
-    // Public API method used by the getter and also by Blueprints
-    _prompting() {
         return {
             /* pre entity hook needs to be written here */
             askForMicroserviceJson: prompts.askForMicroserviceJson,
@@ -297,13 +260,8 @@ module.exports = class extends BaseGenerator {
         };
     }
 
-    get prompting() {
+    get configuring() {
         if (useBlueprint) return;
-        return this._prompting();
-    }
-
-    // Public API method used by the getter and also by Blueprints
-    _configuring() {
         return {
             validateFile() {
                 const context = this.context;
@@ -351,11 +309,6 @@ module.exports = class extends BaseGenerator {
                         if (_.includes(field.fieldValidateRules, 'pattern') && _.isUndefined(field.fieldValidateRulesPattern)) {
                             this.error(chalk.red(`fieldValidateRulesPattern is missing in .simlife/${entityName}.json for field ${JSON.stringify(field, null, 4)}`));
                         }
-                        if (field.fieldType === 'byte[]' || field.fieldType === 'ByteBuffer') {
-                            this.warning(chalk.red(`Cannot use validation in .simlife/${entityName}.json for field ${JSON.stringify(field, null, 4)} \nHibernate JPA 2 Metamodel does not work with Bean Validation 2 for LOB fields, so LOB validation is disabled`));
-                            field.validation = false;
-                            field.fieldValidateRules = [];
-                        }
                     }
                 });
 
@@ -370,11 +323,10 @@ module.exports = class extends BaseGenerator {
                         this.error(chalk.red(`otherEntityName is missing in .simlife/${entityName}.json for relationship ${JSON.stringify(relationship, null, 4)}`));
                     }
 
-                    if (_.isUndefined(relationship.otherEntityRelationshipName)) {
-                        if ((relationship.relationshipType === 'one-to-many' || (relationship.relationshipType === 'many-to-many' && relationship.ownerSide === false) || (relationship.relationshipType === 'one-to-one'))) {
-                            relationship.otherEntityRelationshipName = _.lowerFirst(entityName);
-                            this.warning(`otherEntityRelationshipName is missing in .simlife/${entityName}.json for relationship ${JSON.stringify(relationship, null, 4)}, using ${_.lowerFirst(entityName)} as fallback`);
-                        }
+                    if (_.isUndefined(relationship.otherEntityRelationshipName)
+                        && (relationship.relationshipType === 'one-to-many' || (relationship.relationshipType === 'many-to-many' && relationship.ownerSide === false) || (relationship.relationshipType === 'one-to-one'))) {
+                        relationship.otherEntityRelationshipName = _.lowerFirst(entityName);
+                        this.warning(`otherEntityRelationshipName is missing in .simlife/${entityName}.json for relationship ${JSON.stringify(relationship, null, 4)}, using ${_.lowerFirst(entityName)} as fallback`);
                     }
 
                     if (_.isUndefined(relationship.otherEntityField)
@@ -413,11 +365,12 @@ module.exports = class extends BaseGenerator {
                     context.jpaMetamodelFiltering = false;
                 }
                 if (_.isUndefined(context.pagination)) {
-                    this.warning(`pagination is missing in .simlife/${entityName}.json, using no as fallback`);
-                    context.pagination = 'no';
-                }
-                if (!context.clientRootFolder && !context.skipUiGrouping && context.applicationType === 'gateway' && context.useMicroserviceJson) {
-                    context.clientRootFolder = context.microserviceName;
+                    if (['sql', 'mongodb', 'couchbase'].includes(context.databaseType)) {
+                        this.warning(`pagination is missing in .simlife/${entityName}.json, using no as fallback`);
+                        context.pagination = 'no';
+                    } else {
+                        context.pagination = 'no';
+                    }
                 }
             },
 
@@ -432,12 +385,10 @@ module.exports = class extends BaseGenerator {
                 }
                 this.data = {};
                 this.data.fluentMethods = context.fluentMethods;
-                this.data.clientRootFolder = context.clientRootFolder;
                 this.data.relationships = context.relationships;
                 this.data.fields = context.fields;
                 this.data.changelogDate = context.changelogDate;
                 this.data.dto = context.dto;
-                this.data.searchEngine = context.searchEngine;
                 this.data.service = context.service;
                 this.data.entityTableName = context.entityTableName;
                 this.copyFilteringFlag(context, this.data, context);
@@ -452,9 +403,11 @@ module.exports = class extends BaseGenerator {
                 }
                 if (context.applicationType === 'microservice') {
                     this.data.microserviceName = context.baseName;
+                    this.data.searchEngine = context.searchEngine;
                 }
                 if (context.applicationType === 'gateway' && context.useMicroserviceJson) {
                     this.data.microserviceName = context.microserviceName;
+                    this.data.searchEngine = context.searchEngine;
                 }
                 this.fs.writeJSON(context.filename, this.data, null, 4);
             },
@@ -472,43 +425,34 @@ module.exports = class extends BaseGenerator {
                 context.entityInstancePlural = pluralize(context.entityInstance);
                 context.entityApiUrl = entityNamePluralizedAndSpinalCased;
                 context.entityFileName = _.kebabCase(context.entityNameCapitalized + _.upperFirst(context.entityAngularJSSuffix));
-                context.entityFolderName = this.getEntityFolderName(context.clientRootFolder, context.entityFileName);
-                context.entityModelFileName = context.entityFolderName;
-                context.entityParentPathAddition = this.getEntityParentPathAddition(context.clientRootFolder);
+                context.entityFolderName = context.entityFileName;
                 context.entityPluralFileName = entityNamePluralizedAndSpinalCased + context.entityAngularJSSuffix;
                 context.entityServiceFileName = context.entityFileName;
-                context.entityAngularName = context.entityClass + this.upperFirstCamelCase(context.entityAngularJSSuffix);
-                context.entityReactName = context.entityClass + this.upperFirstCamelCase(context.entityAngularJSSuffix);
+                context.entityAngularName = context.entityClass + _.upperFirst(_.camelCase(context.entityAngularJSSuffix));
+                context.entityReactName = context.entityClass + _.upperFirst(_.camelCase(this.entityAngularJSSuffix));
                 context.entityStateName = _.kebabCase(context.entityAngularName);
                 context.entityUrl = context.entityStateName;
-                context.entityTranslationKey = context.clientRootFolder ? _.camelCase(`${context.clientRootFolder}-${context.entityInstance}`) : context.entityInstance;
-                context.entityTranslationKeyMenu = _.camelCase(context.clientRootFolder ? `${context.clientRootFolder}-${context.entityStateName}` : context.entityStateName);
+                context.entityTranslationKey = context.entityInstance;
+                context.entityTranslationKeyMenu = _.camelCase(context.entityStateName);
                 context.simTablePrefix = this.getTableName(context.simPrefix);
-                context.reactiveRepositories = context.applicationType === 'reactive' && ['mongodb', 'cassandra', 'couchbase'].includes(context.databaseType);
 
-                context.fieldsContainDate = false;
                 context.fieldsContainInstant = false;
                 context.fieldsContainZonedDateTime = false;
                 context.fieldsContainLocalDate = false;
                 context.fieldsContainBigDecimal = false;
                 context.fieldsContainBlob = false;
                 context.fieldsContainImageBlob = false;
-                context.fieldsContainBlobOrImage = false;
                 context.validation = false;
                 context.fieldsContainOwnerManyToMany = false;
                 context.fieldsContainNoOwnerOneToOne = false;
                 context.fieldsContainOwnerOneToOne = false;
                 context.fieldsContainOneToMany = false;
                 context.fieldsContainManyToOne = false;
-                context.fieldsIsReactAvField = false;
-                context.blobFields = [];
                 context.differentTypes = [context.entityClass];
                 if (!context.relationships) {
                     context.relationships = [];
                 }
                 context.differentRelationships = {};
-                context.i18nToLoad = [context.entityInstance];
-                context.i18nKeyPrefix = `${context.angularAppName}.${context.entityTranslationKey}`;
 
                 // Load in-memory data for fields
                 context.fields.forEach((field) => {
@@ -518,22 +462,14 @@ module.exports = class extends BaseGenerator {
                     }
                     const fieldType = field.fieldType;
 
-                    if (!['Instant', 'ZonedDateTime', 'Boolean'].includes(fieldType)) {
-                        context.fieldsIsReactAvField = true;
-                    }
-
                     const nonEnumType = [
                         'String', 'Integer', 'Long', 'Float', 'Double', 'BigDecimal',
                         'LocalDate', 'Instant', 'ZonedDateTime', 'Boolean', 'byte[]', 'ByteBuffer'
                     ].includes(fieldType);
-                    if ((['sql', 'mongodb', 'couchbase', 'no'].includes(context.databaseType)) && !nonEnumType) {
+                    if ((['sql', 'mongodb', 'couchbase'].includes(context.databaseType)) && !nonEnumType) {
                         field.fieldIsEnum = true;
                     } else {
                         field.fieldIsEnum = false;
-                    }
-
-                    if (field.fieldIsEnum === true) {
-                        context.i18nToLoad.push(field.enumInstance);
                     }
 
                     if (_.isUndefined(field.fieldNameCapitalized)) {
@@ -546,9 +482,9 @@ module.exports = class extends BaseGenerator {
 
                     if (_.isUndefined(field.fieldNameAsDatabaseColumn)) {
                         const fieldNameUnderscored = _.snakeCase(field.fieldName);
-                        const jhiFieldNamePrefix = this.getColumnName(context.simPrefix);
-                        if (jhiCore.isReservedTableName(fieldNameUnderscored, context.databaseType)) {
-                            field.fieldNameAsDatabaseColumn = `${jhiFieldNamePrefix}_${fieldNameUnderscored}`;
+                        const simFieldNamePrefix = this.getColumnName(context.simPrefix);
+                        if (simCore.isReservedTableName(fieldNameUnderscored, context.databaseType)) {
+                            field.fieldNameAsDatabaseColumn = `${simFieldNamePrefix}_${fieldNameUnderscored}`;
                         } else {
                             field.fieldNameAsDatabaseColumn = fieldNameUnderscored;
                         }
@@ -575,31 +511,28 @@ module.exports = class extends BaseGenerator {
                     }
 
                     if (_.isUndefined(field.fieldValidateRulesPatternJava)) {
-                        field.fieldValidateRulesPatternJava = field.fieldValidateRulesPattern
-                            ? field.fieldValidateRulesPattern.replace(/\\/g, '\\\\').replace(/"/g, '\\"') : field.fieldValidateRulesPattern;
+                        field.fieldValidateRulesPatternJava = field.fieldValidateRulesPattern ?
+                            field.fieldValidateRulesPattern.replace(/\\/g, '\\\\').replace(/"/g, '\\"') : field.fieldValidateRulesPattern;
                     }
 
-                    field.fieldValidate = _.isArray(field.fieldValidateRules) && field.fieldValidateRules.length >= 1;
+                    if (_.isArray(field.fieldValidateRules) && field.fieldValidateRules.length >= 1) {
+                        field.fieldValidate = true;
+                    } else {
+                        field.fieldValidate = false;
+                    }
 
                     if (fieldType === 'ZonedDateTime') {
                         context.fieldsContainZonedDateTime = true;
-                        context.fieldsContainDate = true;
                     } else if (fieldType === 'Instant') {
                         context.fieldsContainInstant = true;
-                        context.fieldsContainDate = true;
                     } else if (fieldType === 'LocalDate') {
                         context.fieldsContainLocalDate = true;
-                        context.fieldsContainDate = true;
                     } else if (fieldType === 'BigDecimal') {
                         context.fieldsContainBigDecimal = true;
                     } else if (fieldType === 'byte[]' || fieldType === 'ByteBuffer') {
-                        context.blobFields.push(field);
                         context.fieldsContainBlob = true;
                         if (field.fieldTypeBlobContent === 'image') {
                             context.fieldsContainImageBlob = true;
-                        }
-                        if (field.fieldTypeBlobContent !== 'text') {
-                            context.fieldsContainBlobOrImage = true;
                         }
                     }
 
@@ -607,7 +540,6 @@ module.exports = class extends BaseGenerator {
                         context.validation = true;
                     }
                 });
-                context.hasUserField = context.saveUserSnapshot = false;
                 // Load in-memory data for relationships
                 context.relationships.forEach((relationship) => {
                     if (_.isUndefined(relationship.relationshipNameCapitalized)) {
@@ -638,9 +570,9 @@ module.exports = class extends BaseGenerator {
                         relationship.relationshipFieldNamePlural = pluralize(_.lowerFirst(relationship.relationshipName));
                     }
 
-                    if (_.isUndefined(relationship.otherEntityRelationshipNamePlural) && (relationship.relationshipType === 'one-to-many'
-                        || (relationship.relationshipType === 'many-to-many' && relationship.ownerSide === false)
-                        || (relationship.relationshipType === 'one-to-one' && relationship.otherEntityName.toLowerCase() !== 'user'))) {
+                    if (_.isUndefined(relationship.otherEntityRelationshipNamePlural) && (relationship.relationshipType === 'one-to-many' ||
+                        (relationship.relationshipType === 'many-to-many' && relationship.ownerSide === false) ||
+                        (relationship.relationshipType === 'one-to-one' && relationship.otherEntityName.toLowerCase() !== 'user'))) {
                         relationship.otherEntityRelationshipNamePlural = pluralize(relationship.otherEntityRelationshipName);
                     }
 
@@ -654,9 +586,6 @@ module.exports = class extends BaseGenerator {
 
                     const otherEntityName = relationship.otherEntityName;
                     const otherEntityData = this.getEntityJson(otherEntityName);
-                    if (otherEntityData && otherEntityData.microserviceName && !otherEntityData.clientRootFolder) {
-                        otherEntityData.clientRootFolder = otherEntityData.microserviceName;
-                    }
                     const simTablePrefix = context.simTablePrefix;
 
                     if (context.dto && context.dto === 'mapstruct') {
@@ -667,18 +596,16 @@ module.exports = class extends BaseGenerator {
 
                     if (otherEntityName === 'user') {
                         relationship.otherEntityTableName = `${simTablePrefix}_user`;
-                        context.hasUserField = true;
                     } else {
                         relationship.otherEntityTableName = otherEntityData ? otherEntityData.entityTableName : null;
                         if (!relationship.otherEntityTableName) {
                             relationship.otherEntityTableName = this.getTableName(otherEntityName);
                         }
-                        if (jhiCore.isReservedTableName(relationship.otherEntityTableName, context.prodDatabaseType)) {
+                        if (simCore.isReservedTableName(relationship.otherEntityTableName, context.prodDatabaseType)) {
                             const otherEntityTableName = relationship.otherEntityTableName;
                             relationship.otherEntityTableName = `${simTablePrefix}_${otherEntityTableName}`;
                         }
                     }
-                    context.saveUserSnapshot = context.applicationType === 'microservice' && context.authenticationType === 'oauth2' && context.hasUserField;
 
                     if (_.isUndefined(relationship.otherEntityNamePlural)) {
                         relationship.otherEntityNamePlural = pluralize(relationship.otherEntityName);
@@ -688,25 +615,10 @@ module.exports = class extends BaseGenerator {
                         relationship.otherEntityNameCapitalized = _.upperFirst(relationship.otherEntityName);
                     }
 
-                    if (_.isUndefined(relationship.otherEntityRelationshipNamePlural)) {
-                        if (relationship.relationshipType === 'many-to-one') {
-                            if (otherEntityData && otherEntityData.relationships) {
-                                otherEntityData.relationships.forEach((otherRelationship) => {
-                                    if (_.upperFirst(otherRelationship.otherEntityName) === entityName
-                                        && otherRelationship.otherEntityRelationshipName === relationship.relationshipName
-                                        && otherRelationship.relationshipType === 'one-to-many') {
-                                        relationship.otherEntityRelationshipName = otherRelationship.relationshipName;
-                                        relationship.otherEntityRelationshipNamePlural = pluralize(otherRelationship.relationshipName);
-                                    }
-                                });
-                            }
-                        }
-                    }
-
                     if (_.isUndefined(relationship.otherEntityAngularName)) {
                         if (relationship.otherEntityNameCapitalized !== 'User') {
                             const otherEntityAngularSuffix = otherEntityData ? otherEntityData.angularJSSuffix || '' : '';
-                            relationship.otherEntityAngularName = _.upperFirst(relationship.otherEntityName) + this.upperFirstCamelCase(otherEntityAngularSuffix);
+                            relationship.otherEntityAngularName = _.upperFirst(relationship.otherEntityName) + _.upperFirst(_.camelCase(otherEntityAngularSuffix));
                         } else {
                             relationship.otherEntityAngularName = 'User';
                         }
@@ -726,28 +638,10 @@ module.exports = class extends BaseGenerator {
                     if (_.isUndefined(relationship.otherEntityModuleName)) {
                         if (relationship.otherEntityNameCapitalized !== 'User') {
                             relationship.otherEntityModuleName = `${context.angularXAppName + relationship.otherEntityNameCapitalized}Module`;
-                            relationship.otherEntityFileName = _.kebabCase(relationship.otherEntityAngularName);
-                            if (context.skipUiGrouping || otherEntityData === undefined || otherEntityData.clientRootFolder === undefined) {
-                                relationship.otherEntityClientRootFolder = '';
-                            } else {
-                                relationship.otherEntityClientRootFolder = `${otherEntityData.clientRootFolder}/`;
-                            }
-                            if (otherEntityData !== undefined && otherEntityData.clientRootFolder) {
-                                if (context.clientRootFolder === otherEntityData.clientRootFolder) {
-                                    relationship.otherEntityModulePath = relationship.otherEntityFileName;
-                                } else {
-                                    relationship.otherEntityModulePath = `${context.entityParentPathAddition ? `${context.entityParentPathAddition}/` : ''}${otherEntityData.clientRootFolder}/${relationship.otherEntityFileName}`;
-                                }
-                                relationship.otherEntityModelName = `${otherEntityData.clientRootFolder}/${relationship.otherEntityFileName}`;
-                                relationship.otherEntityPath = `${otherEntityData.clientRootFolder}/${relationship.otherEntityFileName}`;
-                            } else {
-                                relationship.otherEntityModulePath = `${context.entityParentPathAddition ? `${context.entityParentPathAddition}/` : ''}${relationship.otherEntityFileName}`;
-                                relationship.otherEntityModelName = relationship.otherEntityFileName;
-                                relationship.otherEntityPath = relationship.otherEntityFileName;
-                            }
+                            relationship.otherEntityModulePath = _.kebabCase(relationship.otherEntityAngularName);
                         } else {
                             relationship.otherEntityModuleName = `${context.angularXAppName}SharedModule`;
-                            relationship.otherEntityModulePath = 'app/core';
+                            relationship.otherEntityModulePath = '../shared';
                         }
                     }
                     // Load in-memory data for root
@@ -764,11 +658,7 @@ module.exports = class extends BaseGenerator {
                     }
 
                     if (relationship.relationshipValidateRules && relationship.relationshipValidateRules.includes('required')) {
-                        if (entityName.toLowerCase() === relationship.otherEntityName.toLowerCase()) {
-                            this.warning(chalk.red('Required relationships to the same entity are not supported.'));
-                        } else {
-                            relationship.relationshipValidate = relationship.relationshipRequired = context.validation = true;
-                        }
+                        relationship.relationshipValidate = relationship.relationshipRequired = context.validation = true;
                     }
 
                     const entityType = relationship.otherEntityNameCapitalized;
@@ -799,23 +689,9 @@ module.exports = class extends BaseGenerator {
         };
     }
 
-    get configuring() {
+    get writing() {
         if (useBlueprint) return;
-        return this._configuring();
-    }
-
-    // Public API method used by the getter and also by Blueprints
-    _writing() {
         return {
-
-            cleanup() {
-                const context = this.context;
-                const entityName = context.name;
-                if (this.isSimlifeVersionLessThan('5.0.0')) {
-                    this.removeFile(`${constants.ANGULAR_DIR}entities/${entityName}/${entityName}.model.ts`);
-                }
-            },
-
             composeServer() {
                 const context = this.context;
                 if (context.skipServer) return;
@@ -853,13 +729,8 @@ module.exports = class extends BaseGenerator {
         };
     }
 
-    get writing() {
+    get install() {
         if (useBlueprint) return;
-        return this._writing();
-    }
-
-    // Public API method used by the getter and also by Blueprints
-    _install() {
         return {
             afterRunHook() {
                 const done = this.async();
@@ -885,10 +756,5 @@ module.exports = class extends BaseGenerator {
                 }
             }
         };
-    }
-
-    get install() {
-        if (useBlueprint) return;
-        return this._install();
     }
 };

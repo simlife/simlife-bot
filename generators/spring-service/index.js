@@ -1,7 +1,7 @@
 /**
- * Copyright 2018 the original author or authors from the Simlife project.
+ * Copyright 2013-2018 the original author or authors from the Simlife project.
  *
- * This file is part of the Simlife project, see https://www.simlife.io/
+ * This file is part of the Simlife project, see http://www.simlife.tech/
  * for more information.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,83 +16,46 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/* eslint-disable consistent-return */
+
 const _ = require('lodash');
 const BaseGenerator = require('../generator-base');
 const constants = require('../generator-constants');
 
 const SERVER_MAIN_SRC_DIR = constants.SERVER_MAIN_SRC_DIR;
 
-let useBlueprint;
 module.exports = class extends BaseGenerator {
     constructor(args, opts) {
         super(args, opts);
         this.argument('name', { type: String, required: true });
         this.name = this.options.name;
-        const blueprint = this.config.get('blueprint');
-        if (!opts.fromBlueprint) {
-            // use global variable since getters dont have access to instance property
-            useBlueprint = this.composeBlueprint(
-                blueprint,
-                'spring-service',
-                {
-                    force: this.options.force,
-                    arguments: [this.name]
-                }
-            );
-        } else {
-            useBlueprint = false;
-        }
     }
 
-    // Public API method used by the getter and also by Blueprints
-    _initializing() {
-        return {
-            initializing() {
-                this.log(`The service ${this.name} is being created.`);
-                const configuration = this.getAllSimlifeConfig(this, true);
-                this.baseName = configuration.get('baseName');
-                this.packageName = configuration.get('packageName');
-                this.packageFolder = configuration.get('packageFolder');
-                this.databaseType = configuration.get('databaseType');
+    initializing() {
+        this.log(`The service ${this.name} is being created.`);
+        this.baseName = this.config.get('baseName');
+        this.packageName = this.config.get('packageName');
+        this.packageFolder = this.config.get('packageFolder');
+        this.databaseType = this.config.get('databaseType');
+    }
+
+    prompting() {
+        const done = this.async();
+
+        const prompts = [
+            {
+                type: 'confirm',
+                name: 'useInterface',
+                message: '(1/1) Do you want to use an interface for your service?',
+                default: false
             }
-        };
+        ];
+        this.prompt(prompts).then((props) => {
+            this.useInterface = props.useInterface;
+            done();
+        });
     }
 
-    get initializing() {
-        if (useBlueprint) return;
-        return this._initializing();
-    }
-
-    // Public API method used by the getter and also by Blueprints
-    _prompting() {
-        return {
-            prompting() {
-                const done = this.async();
-
-                const prompts = [
-                    {
-                        type: 'confirm',
-                        name: 'useInterface',
-                        message: '(1/1) Do you want to use an interface for your service?',
-                        default: false
-                    }
-                ];
-                this.prompt(prompts).then((props) => {
-                    this.useInterface = props.useInterface;
-                    done();
-                });
-            }
-        };
-    }
-
-    get prompting() {
-        if (useBlueprint) return;
-        return this._prompting();
-    }
-
-    // Public API method used by the getter and also by Blueprints
-    _default() {
+    get default() {
         return {
             insight() {
                 const insight = this.insight();
@@ -102,35 +65,20 @@ module.exports = class extends BaseGenerator {
         };
     }
 
-    get default() {
-        if (useBlueprint) return;
-        return this._default();
-    }
+    writing() {
+        this.serviceClass = _.upperFirst(this.name);
+        this.serviceInstance = _.lowerCase(this.name);
 
-    // Public API method used by the getter and also by Blueprints
-    _writing() {
-        return {
-            write() {
-                this.serviceClass = _.upperFirst(this.name) + (this.name.endsWith('Service') ? '' : 'Service');
-                this.serviceInstance = _.lowerCase(this.serviceClass);
+        this.template(
+            `${SERVER_MAIN_SRC_DIR}package/service/_Service.java`,
+            `${SERVER_MAIN_SRC_DIR + this.packageFolder}/service/${this.serviceClass}Service.java`
+        );
 
-                this.template(
-                    `${SERVER_MAIN_SRC_DIR}package/service/Service.java.ejs`,
-                    `${SERVER_MAIN_SRC_DIR + this.packageFolder}/service/${this.serviceClass}.java`
-                );
-
-                if (this.useInterface) {
-                    this.template(
-                        `${SERVER_MAIN_SRC_DIR}package/service/impl/ServiceImpl.java.ejs`,
-                        `${SERVER_MAIN_SRC_DIR + this.packageFolder}/service/impl/${this.serviceClass}Impl.java`
-                    );
-                }
-            }
-        };
-    }
-
-    get writing() {
-        if (useBlueprint) return;
-        return this._writing();
+        if (this.useInterface) {
+            this.template(
+                `${SERVER_MAIN_SRC_DIR}package/service/impl/_ServiceImpl.java`,
+                `${SERVER_MAIN_SRC_DIR + this.packageFolder}/service/impl/${this.serviceClass}ServiceImpl.java`
+            );
+        }
     }
 };

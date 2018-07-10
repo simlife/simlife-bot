@@ -1,7 +1,7 @@
 /**
- * Copyright 2018 the original author or authors from the Simlife project.
+ * Copyright 2013-2018 the original author or authors from the Simlife project.
  *
- * This file is part of the Simlife project, see https://www.simlife.io/
+ * This file is part of the Simlife project, see http://www.simlife.tech/
  * for more information.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -23,17 +23,17 @@ module.exports = {
 function writeFiles() {
     return {
         writeRancherCompose() {
-            this.template('rancher-compose.yml.ejs', 'rancher-compose.yml');
+            this.template('_rancher-compose.yml', 'rancher-compose.yml');
         },
 
         writeDockerCompose() {
-            this.template('docker-compose.yml.ejs', 'docker-compose.yml');
+            this.template('_docker-compose.yml', 'docker-compose.yml');
         },
 
         writeRegistrySidekickFiles() {
             if (this.serviceDiscoveryType === 'eureka' || this.serviceDiscoveryType === 'consul') {
                 this.copy('registry-config-sidekick/Dockerfile', 'registry-config-sidekick/Dockerfile');
-                this.template('registry-config-sidekick/application.yml.ejs', 'registry-config-sidekick/application.yml');
+                this.template('registry-config-sidekick/_application.yml', 'registry-config-sidekick/application.yml');
             }
         }
     };

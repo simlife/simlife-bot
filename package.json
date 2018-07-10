@@ -1,7 +1,7 @@
 {
   "name": "simlife-bot",
-  "version": "5.0.2",
-  "description": "Spring Boot + Angular/React in one handy generator",
+  "version": "4.14.5",
+  "description": "Spring Boot + Angular in one handy generator",
   "files": [
     "cli",
     "generators"
@@ -14,14 +14,17 @@
     "Spring Security",
     "JPA",
     "Hibernate",
-    "React",
+    "AngularJS",
     "Angular",
-    "Twitter Bootstrap",
-    "Webpack",
-    "Docker"
+    "Twitter Bootstrap"
   ],
-  "homepage": "https://www.simlife.io/",
+  "homepage": "http://www.simlife.tech/",
   "bugs": "https://github.com/simlife/simlife-bot/issues",
+  "author": {
+    "name": "Julien Dubois",
+    "email": "",
+    "url": "https://github.com/jdubois"
+  },
   "main": "cli/index.js",
   "bin": {
     "simlife": "./cli/simlife.js"
@@ -40,48 +43,53 @@
     "pretest": "npm run lint",
     "test": "npm run test:unit -- test/*.spec.js",
     "test:unit": "mocha --timeout 20000 --slow 0 --reporter spec",
-    "jsdoc": "jsdoc --configure jsdoc-conf.json"
+    "jsdoc": "jsdoc --configure jsdoc-conf.json",
+    "postinstall": "opencollective postinstall"
   },
   "dependencies": {
-    "chalk": "2.4.1",
-    "commander": "2.16.0",
+    "chalk": "2.3.0",
+    "cheerio": "0.22.0",
+    "commander": "2.12.2",
     "didyoumean": "1.2.1",
-    "ejs": "2.6.1",
+    "ejs": "2.5.7",
     "glob": "7.1.2",
-    "gulp-filter": "5.1.0",
-    "insight": "0.10.1",
-    "simlife-core": "3.0.2",
-    "js-yaml": "3.12.0",
-    "lodash": "4.17.10",
-    "meow": "5.0.0",
+    "html-wiring": "1.2.0",
+    "insight": "0.8.4",
+    "simlife-core": "1.4.4",
+    "js-yaml": "3.10.0",
+    "lodash": "4.17.4",
+    "meow": "3.7.0",
     "mkdirp": "0.5.1",
+    "opencollective": "1.0.3",
     "pluralize": "7.0.0",
-    "prettier": "1.13.7",
-    "randexp": "0.4.9",
-    "semver": "5.5.0",
-    "shelljs": "0.8.2",
+    "randexp": "0.4.6",
+    "semver": "5.4.1",
+    "shelljs": "0.7.8",
     "tabtab": "2.2.2",
-    "through2": "2.0.3",
-    "yeoman-environment": "2.3.0",
-    "yeoman-generator": "2.0.5"
+    "yeoman-environment": "2.0.5",
+    "yeoman-generator": "2.0.1"
   },
   "devDependencies": {
     "chai": "4.1.2",
     "ejs-lint": "0.3.0",
-    "eslint": "5.0.1",
-    "eslint-config-airbnb-base": "13.0.0",
-    "eslint-plugin-import": "2.13.0",
-    "fs-extra": "6.0.1",
+    "eslint": "4.13.0",
+    "eslint-config-airbnb-base": "12.1.0",
+    "eslint-plugin-import": "2.8.0",
+    "fs-extra": "4.0.3",
     "jsdoc": "3.5.5",
-    "mocha": "5.2.0",
-    "sinon": "6.0.1",
-    "yeoman-assert": "3.1.1",
-    "yeoman-test": "1.8.0"
+    "mocha": "4.0.1",
+    "sinon": "2.4.1",
+    "yeoman-assert": "3.1.0",
+    "yeoman-test": "1.7.0"
   },
   "engines": {
-    "node": ">=8.10.0",
-    "npm": ">=5.6.0"
+    "node": ">=6.9.0",
+    "npm": ">=2.14.2"
   },
-  "license": "Apache-2.0"
-
+  "license": "Apache-2.0",
+  "collective": {
+    "type": "opencollective",
+    "url": "https://opencollective.com/simlife-bot",
+    "logo": "https://opencollective.com/opencollective/logo.txt"
+  }
 }

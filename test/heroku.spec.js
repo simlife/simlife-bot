@@ -5,8 +5,8 @@ const assert = require('yeoman-assert');
 const helpers = require('yeoman-test');
 const fse = require('fs-extra');
 const sinon = require('sinon');
-const ChildProcess = require('child_process');
 const constants = require('../generators/generator-constants');
+const ChildProcess = require('child_process');
 
 const expectedFiles = {
     monolith: [
@@ -25,41 +25,6 @@ describe('Simlife Heroku Sub Generator', () => {
         stub.withArgs('heroku --version').yields(false);
         stub.withArgs('heroku plugins').yields(false, 'heroku-cli-deploy');
         stub.withArgs('git init').yields([false, '', '']);
-    });
-
-    describe('microservice application', () => {
-        describe('with JAR deployment', () => {
-            beforeEach((done) => {
-                stub.withArgs(`heroku create ${herokuAppName}`).yields(false, '', '');
-                stub.withArgs(`heroku addons:create jawsdb:kitefin --as DATABASE --app ${herokuAppName}`).yields(false, '', '');
-                stub.withArgs(`heroku config:set SIMLIFE_REGISTRY_URL=https://admin:changeme@sushi.herokuapp.com --app ${herokuAppName}`).yields(false, '', '').returns({
-                    stdout: {
-                        on: () => {}
-                    }
-                });
-                helpers
-                    .run(require.resolve('../generators/heroku'))
-                    .inTmpDir((dir) => {
-                        fse.copySync(path.join(__dirname, './templates/default-microservice/'), dir);
-                    })
-                    .withOptions({ skipBuild: true })
-                    .withPrompts({
-                        herokuAppName,
-                        herokuRegion: 'us',
-                        herokuDeployType: 'jar',
-                        herokuSimlifeRegistryApp: 'sushi',
-                        herokuSimlifeRegistryUsername: 'admin',
-                        herokuSimlifeRegistryPassword: 'changeme'
-                    })
-                    .on('end', done);
-            });
-            after(() => {
-                stub.restore();
-            });
-            it('creates expected files', () => {
-                assert.fileContent('.yo-rc.json', '"herokuDeployType": "jar"');
-            });
-        });
     });
 
     describe('monolith application', () => {
@@ -228,36 +193,6 @@ describe('Simlife Heroku Sub Generator', () => {
             it('creates expected monolith files', () => {
                 assert.file(expectedFiles.monolith);
                 assert.fileContent('.yo-rc.json', `"herokuAppName": "${existingHerokuAppName}"`);
-            });
-        });
-
-        describe('with elasticsearch', () => {
-            beforeEach((done) => {
-                stub.withArgs(`heroku create ${herokuAppName}`).yields(false, '', '');
-                stub.withArgs(`heroku addons:create jawsdb:kitefin --as DATABASE --app ${herokuAppName}`).yields(false, '', '');
-                stub.withArgs(`heroku addons:create searchbox:starter --as SEARCHBOX --app ${herokuAppName}`).yields(false, '', '');
-
-                helpers
-                    .run(require.resolve('../generators/heroku'))
-                    .inTmpDir((dir) => {
-                        fse.copySync(path.join(__dirname, './templates/default-elasticsearch/'), dir);
-                    })
-                    .withOptions({ skipBuild: true })
-                    .withPrompts({
-                        herokuAppName,
-                        herokuRegion: 'us',
-                        herokuDeployType: 'jar'
-                    })
-                    .on('end', done);
-            });
-            after(() => {
-                stub.restore();
-            });
-            it('creates expected monolith files', () => {
-                assert.file(expectedFiles.monolith);
-                assert.fileContent('.yo-rc.json', '"herokuDeployType": "jar"');
-                assert.fileContent(`${constants.SERVER_MAIN_RES_DIR}/config/application-heroku.yml`, 'datasource:');
-                assert.noFileContent(`${constants.SERVER_MAIN_RES_DIR}/config/application-heroku.yml`, 'mongodb:');
             });
         });
     });

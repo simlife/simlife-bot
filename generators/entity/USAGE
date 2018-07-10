@@ -1,5 +1,5 @@
 Description:
-    Creates a new Simlife entity: JPA entity, Spring server side components and client side components
+    Creates a new Simlife entity: JPA entity, Spring server side components and Angular client side components
 
 Example:
     simlife entity Foo

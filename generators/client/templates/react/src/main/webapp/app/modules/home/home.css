@@ -1,0 +1,16 @@
+
+/* ==========================================================================
+Main page styles
+========================================================================== */
+.img-fluid {
+    max-width: 100%;
+    height: auto;
+}
+
+.simlife {
+    display: inline-block;
+    width: 347px;
+    height: 497px;
+    background: url("../../../static/images/logo-simlife-react.svg") no-repeat center top;
+    background-size: contain;
+}

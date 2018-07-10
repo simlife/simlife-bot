@@ -1,6 +1,6 @@
 {
     "home": {
-        "title": "ようこそ, Simlife Bot!",
+        "title": "ようこそ, Java Simlife!",
         "subtitle": "ここはトップページです。",
         "logged": {
             "message": "\"{{username}}\"としてログインしています。"

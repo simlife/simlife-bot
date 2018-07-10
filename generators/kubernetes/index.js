@@ -1,7 +1,7 @@
 /**
- * Copyright 2018 the original author or authors from the Simlife project.
+ * Copyright 2013-2018 the original author or authors from the Simlife project.
  *
- * This file is part of the Simlife project, see https://www.simlife.io/
+ * This file is part of the Simlife project, see http://www.simlife.tech/
  * for more information.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,7 +18,6 @@
  */
 const chalk = require('chalk');
 const shelljs = require('shelljs');
-const fs = require('fs');
 const prompts = require('./prompts');
 const writeFiles = require('./files').writeFiles;
 const BaseGenerator = require('../generator-base');
@@ -56,8 +55,8 @@ module.exports = class extends BaseGenerator {
 
                 shelljs.exec('kubectl version', { silent: true }, (code, stdout, stderr) => {
                     if (stderr) {
-                        this.log(`${chalk.yellow.bold('WARNING!')} kubectl 1.2 or later is not installed on your computer.\n`
-                          + 'Make sure you have Kubernetes installed. Read http://kubernetes.io/docs/getting-started-guides/binary_release/\n');
+                        this.log(`${chalk.yellow.bold('WARNING!')} kubectl 1.2 or later is not installed on your computer.\n` +
+                          'Make sure you have Kubernetes installed. Read http://kubernetes.io/docs/getting-started-guides/binary_release/\n');
                     }
                     done();
                 });
@@ -73,12 +72,10 @@ module.exports = class extends BaseGenerator {
                 this.dockerRepositoryName = this.config.get('dockerRepositoryName');
                 this.dockerPushCommand = this.config.get('dockerPushCommand');
                 this.kubernetesNamespace = this.config.get('kubernetesNamespace');
-                this.monitoring = this.config.get('monitoring');
+                this.simlifeConsole = this.config.get('simlifeConsole');
+                this.prometheusOperator = this.config.get('prometheusOperator');
                 this.kubernetesServiceType = this.config.get('kubernetesServiceType');
                 this.ingressDomain = this.config.get('ingressDomain');
-                this.useKafka = false;
-                this.istio = this.config.get('istio');
-                this.istioRoute = this.config.get('istioRoute');
 
                 this.DOCKER_SIMLIFE_REGISTRY = constants.DOCKER_SIMLIFE_REGISTRY;
                 this.DOCKER_SIMLIFE_ELASTICSEARCH = constants.DOCKER_SIMLIFE_ELASTICSEARCH;
@@ -95,13 +92,9 @@ module.exports = class extends BaseGenerator {
                 this.DOCKER_ORACLE = constants.DOCKER_ORACLE;
                 this.DOCKER_MONGODB = constants.DOCKER_MONGODB;
                 this.DOCKER_COUCHBASE = constants.DOCKER_COUCHBASE;
-                this.DOCKER_MEMCACHED = constants.DOCKER_MEMCACHED;
                 this.DOCKER_ELASTICSEARCH = constants.DOCKER_ELASTICSEARCH;
                 this.DOCKER_KAFKA = constants.DOCKER_KAFKA;
                 this.DOCKER_ZOOKEEPER = constants.DOCKER_ZOOKEEPER;
-                this.DOCKER_PROMETHEUS_OPERATOR = constants.DOCKER_PROMETHEUS_OPERATOR;
-                this.DOCKER_GRAFANA_WATCHER = constants.DOCKER_GRAFANA_WATCHER;
-                this.DOCKER_GRAFANA = constants.DOCKER_GRAFANA;
 
                 if (this.defaultAppsFolders !== undefined) {
                     this.log('\nFound .yo-rc.json config file...');
@@ -138,15 +131,15 @@ module.exports = class extends BaseGenerator {
             askForApplicationType: prompts.askForApplicationType,
             askForPath: prompts.askForPath,
             askForApps: prompts.askForApps,
-            askForMonitoring: prompts.askForMonitoring,
-            askForClustersMode: prompts.askForClustersMode,
+            // cluster for mongodb: it can be done later
+            // askForClustersMode: prompts.askForClustersMode,
             askForServiceDiscovery: prompts.askForServiceDiscovery,
             askForAdminPassword: prompts.askForAdminPassword,
             askForKubernetesNamespace: prompts.askForKubernetesNamespace,
             askForDockerRepositoryName: prompts.askForDockerRepositoryName,
             askForDockerPushCommand: prompts.askForDockerPushCommand,
-            askForIstioSupport: prompts.askForIstioSupport,
-            askForIstioRouteFiles: prompts.askForIstioRouteFiles,
+            askForJsimlifeConsole: prompts.askForJsimlifeConsole,
+            askForPrometheusOperator: prompts.askForPrometheusOperator,
             askForKubernetesServiceType: prompts.askForKubernetesServiceType,
             askForIngressDomain: prompts.askForIngressDomain
         };
@@ -164,31 +157,17 @@ module.exports = class extends BaseGenerator {
             configureImageNames: docker.configureImageNames,
             setAppsFolderPaths: docker.setAppsFolderPaths,
 
-            setPostPromptProp() {
-                this.appConfigs.forEach((element) => {
-                    element.clusteredDb ? element.dbPeerCount = 3 : element.dbPeerCount = 1;
-                    if (element.messageBroker === 'kafka') {
-                        this.useKafka = true;
-                    }
-                });
-            },
-
             saveConfig() {
-                this.config.set({
-                    appsFolders: this.appsFolders,
-                    directoryPath: this.directoryPath,
-                    clusteredDbApps: this.clusteredDbApps,
-                    serviceDiscoveryType: this.serviceDiscoveryType,
-                    jwtSecretKey: this.jwtSecretKey,
-                    dockerRepositoryName: this.dockerRepositoryName,
-                    dockerPushCommand: this.dockerPushCommand,
-                    kubernetesNamespace: this.kubernetesNamespace,
-                    kubernetesServiceType: this.kubernetesServiceType,
-                    ingressDomain: this.ingressDomain,
-                    monitoring: this.monitoring,
-                    istio: this.istio,
-                    istioRoute: this.istioRoute
-                });
+                this.config.set('appsFolders', this.appsFolders);
+                this.config.set('directoryPath', this.directoryPath);
+                this.config.set('clusteredDbApps', this.clusteredDbApps);
+                this.config.set('serviceDiscoveryType', this.serviceDiscoveryType);
+                this.config.set('jwtSecretKey', this.jwtSecretKey);
+                this.config.set('dockerRepositoryName', this.dockerRepositoryName);
+                this.config.set('dockerPushCommand', this.dockerPushCommand);
+                this.config.set('kubernetesNamespace', this.kubernetesNamespace);
+                this.config.set('kubernetesServiceType', this.kubernetesServiceType);
+                this.config.set('ingressDomain', this.ingressDomain);
             }
         };
     }
@@ -215,8 +194,23 @@ module.exports = class extends BaseGenerator {
             this.log(`  ${chalk.cyan(`${this.dockerPushCommand} ${targetImageName}`)}`);
         }
 
-        this.log('\nYou can deploy all your apps by running the following script:');
-        this.log(`  ${chalk.cyan('./kubectl-apply.sh')}`);
+        this.log('\nYou can deploy all your apps by running: ');
+        if (this.kubernetesNamespace !== 'default') {
+            this.log(`  ${chalk.cyan('kubectl apply -f namespace.yml')}`);
+        }
+        if (this.simlifeConsole) {
+            this.log(`  ${chalk.cyan('kubectl apply -f console')}`);
+        }
+        if (this.prometheusOperator) {
+            this.log(`  ${chalk.cyan('kubectl apply -f prometheus-tpr.yml')}`);
+        }
+        if (this.gatewayNb >= 1 || this.microserviceNb >= 1) {
+            this.log(`  ${chalk.cyan('kubectl apply -f registry')}`);
+        }
+        for (let i = 0; i < this.appsFolders.length; i++) {
+            this.log(`  ${chalk.cyan(`kubectl apply -f ${this.appConfigs[i].baseName.toLowerCase()}`)}`);
+        }
+
         if (this.gatewayNb + this.monolithicNb >= 1) {
             const namespaceSuffix = this.kubernetesNamespace === 'default' ? '' : ` -n ${this.kubernetesNamespace}`;
             this.log('\nUse these commands to find your application\'s IP addresses:');
@@ -226,12 +220,6 @@ module.exports = class extends BaseGenerator {
                 }
             }
             this.log();
-        }
-        // Make the apply script executable
-        try {
-            fs.chmodSync('kubectl-apply.sh', '755');
-        } catch (err) {
-            this.log(`${chalk.yellow.bold('WARNING!')}Failed to make 'kubectl-apply.sh' executable, you may need to run 'chmod +x kubectl-apply.sh'`);
         }
     }
 };

@@ -1,7 +1,7 @@
 /**
- * Copyright 2018 the original author or authors from the Simlife project.
+ * Copyright 2013-2018 the original author or authors from the Simlife project.
  *
- * This file is part of the Simlife project, see https://www.simlife.io/
+ * This file is part of the Simlife project, see http://www.simlife.tech/
  * for more information.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -21,10 +21,12 @@ const dockerPrompts = require('../docker-prompts');
 
 module.exports = _.extend({
     askForKubernetesNamespace,
+    askForDockerRepositoryName,
+    askForDockerPushCommand,
+    askForJsimlifeConsole,
+    askForPrometheusOperator,
     askForKubernetesServiceType,
-    askForIngressDomain,
-    askForIstioSupport,
-    askForIstioRouteFiles
+    askForIngressDomain
 }, dockerPrompts);
 
 function askForKubernetesNamespace() {
@@ -39,6 +41,70 @@ function askForKubernetesNamespace() {
 
     this.prompt(prompts).then((props) => {
         this.kubernetesNamespace = props.kubernetesNamespace;
+        done();
+    });
+}
+
+function askForDockerRepositoryName() {
+    const done = this.async();
+
+    const prompts = [{
+        type: 'input',
+        name: 'dockerRepositoryName',
+        message: 'What should we use for the base Docker repository name?',
+        default: this.dockerRepositoryName
+    }];
+
+    this.prompt(prompts).then((props) => {
+        this.dockerRepositoryName = props.dockerRepositoryName;
+        done();
+    });
+}
+
+function askForDockerPushCommand() {
+    const done = this.async();
+
+    const prompts = [{
+        type: 'input',
+        name: 'dockerPushCommand',
+        message: 'What command should we use for push Docker image to repository?',
+        default: this.dockerPushCommand ? this.dockerPushCommand : 'docker push'
+    }];
+
+    this.prompt(prompts).then((props) => {
+        this.dockerPushCommand = props.dockerPushCommand;
+        done();
+    });
+}
+
+function askForJsimlifeConsole() {
+    const done = this.async();
+
+    const prompts = [{
+        type: 'confirm',
+        name: 'simlifeConsole',
+        message: 'Do you want to use Simlife Console for log aggregation (ELK)?',
+        default: this.simlifeConsole ? this.simlifeConsole : true
+    }];
+
+    this.prompt(prompts).then((props) => {
+        this.simlifeConsole = props.simlifeConsole;
+        done();
+    });
+}
+
+function askForPrometheusOperator() {
+    const done = this.async();
+
+    const prompts = [{
+        type: 'confirm',
+        name: 'prometheusOperator',
+        message: 'Do you want to export your services for Prometheus (needs a running prometheus operator)?',
+        default: this.prometheusOperator ? this.prometheusOperator : true
+    }];
+
+    this.prompt(prompts).then((props) => {
+        this.prometheusOperator = props.prometheusOperator;
         done();
     });
 }
@@ -101,70 +167,6 @@ function askForIngressDomain() {
 
     this.prompt(prompts).then((props) => {
         this.ingressDomain = props.ingressDomain;
-        done();
-    });
-}
-
-function askForIstioSupport() {
-    if (this.composeApplicationType === 'monolith') {
-        this.istio = 'no';
-        return;
-    }
-    const done = this.async();
-
-    const prompts = [{
-        type: 'list',
-        name: 'istio',
-        message: 'Do you want to configure Istio?',
-        choices: [
-            {
-                value: 'no',
-                name: 'Not required'
-            },
-            {
-                value: 'manualInjection',
-                name: 'Manual sidecar injection (ensure istioctl in $PATH)'
-            },
-            {
-                value: 'autoInjection',
-                name: 'Label tag namespace as automatic injection is already configured'
-            }
-        ],
-        default: this.istio ? this.istio : 'no'
-    }];
-
-    this.prompt(prompts).then((props) => {
-        this.istio = props.istio;
-        done();
-    });
-}
-
-function askForIstioRouteFiles() {
-    if (this.istio === 'no') {
-        this.istioRoute = false;
-        return;
-    }
-    const done = this.async();
-
-    const prompts = [{
-        type: 'list',
-        name: 'istioRoute',
-        message: 'Do you want to generate Istio route files?',
-        choices: [
-            {
-                value: false,
-                name: 'No'
-            },
-            {
-                value: true,
-                name: 'Yes'
-            }
-        ],
-        default: this.istioRoute
-    }];
-
-    this.prompt(prompts).then((props) => {
-        this.istioRoute = props.istioRoute;
         done();
     });
 }

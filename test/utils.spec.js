@@ -49,12 +49,11 @@ describe('Simlife Utils', () => {
     });
     describe('::buildEnumFunction', () => {
         it('describes all the properties of the entity', () => {
-            const packageName = 'com.package';
-            const angularAppName = 'myApp';
-            const clientRootFolder = 'root';
+            let packageName;
+            let angularAppName;
             const entity = { enumName: 'entityName', fieldValues: 'field1, field2' };
-            const infos = utils.buildEnumInfo(entity, angularAppName, packageName, clientRootFolder);
-            assert.objectContent(infos, { packageName, angularAppName, clientRootFolder: `${clientRootFolder}-` });
+            const infos = utils.buildEnumInfo(entity, angularAppName = 'myApp', packageName = 'com.package');
+            assert.objectContent(infos, { packageName, angularAppName });
         });
     });
     describe('::deepFind function', () => {

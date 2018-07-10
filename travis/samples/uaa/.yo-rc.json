@@ -15,6 +15,7 @@
     "messageBroker": false,
     "serviceDiscoveryType": "eureka",
     "buildTool": "maven",
+    "enableSocialSignIn": false,
     "enableTranslation": true,
     "applicationType": "uaa",
     "testFrameworks": [

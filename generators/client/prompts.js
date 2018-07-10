@@ -1,7 +1,7 @@
 /**
- * Copyright 2018 the original author or authors from the Simlife project.
+ * Copyright 2013-2018 the original author or authors from the Simlife project.
  *
- * This file is part of the Simlife project, see https://www.simlife.io/
+ * This file is part of the Simlife project, see http://www.simlife.tech/
  * for more information.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -39,13 +39,22 @@ function askForClient(meta) {
     const choices = [
         {
             value: 'angularX',
-            name: 'Angular 6'
-        },
-        {
-            value: 'react',
-            name: 'React'
+            name: 'Angular 5'
         }
     ];
+
+    if (this.authenticationType !== 'oauth2') {
+        choices.push({
+            value: 'angular1',
+            name: 'AngularJS 1.x'
+        });
+        if (this.experimental) {
+            choices.push({
+                value: 'react',
+                name: '[EXPERIMENTAL] React'
+            });
+        }
+    }
 
     const PROMPT = {
         type: 'list',

@@ -30,7 +30,8 @@
     "travis": true,
     "websocket": false,
     "messageBroker": false,
-    "clientFramework": "angularX",
+    "enableSocialSignIn": false,
+    "clientFramework": "angular1",
     "clientPackageManager": "yarn"
   }
 }

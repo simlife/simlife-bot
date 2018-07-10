@@ -1,6 +1,6 @@
 {
     "home": {
-        "title": "Bienvenue, Simlife Bot !",
+        "title": "Bienvenue, Java Simlife !",
         "subtitle": "Ceci est votre page d'accueil",
         "logged": {
             "message": "Vous êtes connecté en tant que \"{{username}}\"."

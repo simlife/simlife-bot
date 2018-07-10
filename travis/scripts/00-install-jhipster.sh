@@ -7,7 +7,36 @@ set -e
 ls -al "$HOME"
 
 #-------------------------------------------------------------------------------
-# Install Simlife Dependencies and Server-side library
+# Install Simlife Dependencies
+#-------------------------------------------------------------------------------
+cd "$HOME"
+if [[ "$TRAVIS_REPO_SLUG" == *"/simlife-dependencies" ]]; then
+    echo "TRAVIS_REPO_SLUG=$TRAVIS_REPO_SLUG"
+    echo "No need to clone simlife-dependencies: use local version"
+
+    cd "$TRAVIS_BUILD_DIR"
+    ./mvnw clean install -Dgpg.skip=true
+
+elif [[ "$SIMLIFE_DEPENDENCIES_BRANCH" == "release" ]]; then
+    echo "No need to clone simlife-dependencies: use release version"
+
+else
+    git clone "$SIMLIFE_DEPENDENCIES_REPO" simlife-dependencies
+    cd simlife-dependencies
+    if [ "$SIMLIFE_DEPENDENCIES_BRANCH" == "latest" ]; then
+        LATEST=$(git describe --abbrev=0)
+        git checkout -b "$LATEST" "$LATEST"
+    elif [ "$SIMLIFE_DEPENDENCIES_BRANCH" != "master" ]; then
+        git checkout -b "$SIMLIFE_DEPENDENCIES_BRANCH" origin/"$SIMLIFE_DEPENDENCIES_BRANCH"
+    fi
+    git --no-pager log -n 10 --graph --pretty='%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit
+
+    ./mvnw clean install -Dgpg.skip=true
+    ls -al ~/.m2/repository/io/github/simlife/simlife-dependencies/
+fi
+
+#-------------------------------------------------------------------------------
+# Install Simlife lib
 #-------------------------------------------------------------------------------
 cd "$HOME"
 if [[ "$TRAVIS_REPO_SLUG" == *"/simlife" ]]; then
@@ -31,12 +60,8 @@ else
     fi
     git --no-pager log -n 10 --graph --pretty='%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit
 
-    travis/scripts/00-replace-version-simlife.sh
-
     ./mvnw clean install -Dgpg.skip=true
-    ls -al ~/.m2/repository/io/github/simlife/simlife-framework/
-    ls -al ~/.m2/repository/io/github/simlife/simlife-dependencies/
-    ls -al ~/.m2/repository/io/github/simlife/simlife-parent/
+    ls -al ~/.m2/repository/io/github/simlife/simlife/
 fi
 
 #-------------------------------------------------------------------------------
@@ -50,7 +75,7 @@ if [[ "$TRAVIS_REPO_SLUG" == *"/simlife-bot" ]]; then
     cd "$TRAVIS_BUILD_DIR"/
     yarn install
     yarn global add file:"$TRAVIS_BUILD_DIR"
-    if [[ "$JHIPSTER" == "" || "$JHIPSTER" == "ngx-default" ]]; then
+    if [[ "$SIMLIFE" == "" || "$SIMLIFE" == "ngx-default" ]]; then
         yarn test
     fi
 

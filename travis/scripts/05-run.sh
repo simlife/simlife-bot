@@ -32,20 +32,21 @@ launchCurlOrProtractor() {
 
     if [ "$status" -ne 0 ]; then
         echo "[$(date)] Not connected after" $retryCount " retries."
-        return 1
+        exit 1
     fi
 
     if [ "$PROTRACTOR" != 1 ]; then
-        return 0
+        exit 0
     fi
 
     retryCount=0
-    maxRetry=1
+    maxRetry=2
     until [ "$retryCount" -ge "$maxRetry" ]
     do
         result=0
-        if [[ -f "tsconfig.json" ]]; then
-            ls -al node_modules/webdriver-manager/selenium/
+        if [[ -f "gulpfile.js" ]]; then
+            gulp itest --no-notification
+        elif [[ -f "tsconfig.json" ]]; then
             yarn e2e
         fi
         result=$?
@@ -54,7 +55,7 @@ launchCurlOrProtractor() {
         echo "e2e tests failed... retryCount =" $retryCount "/" $maxRetry
         sleep 15
     done
-    return $result
+    exit $result
 }
 
 #-------------------------------------------------------------------------------
@@ -74,7 +75,7 @@ if [ -f "mvnw" ]; then
     ./mvnw verify -DskipTests -P"$PROFILE"
     mv target/*.war app.war
 elif [ -f "gradlew" ]; then
-    ./gradlew bootWar -P"$PROFILE" -x test
+    ./gradlew bootRepackage -P"$PROFILE" -x test
     mv build/libs/*.war app.war
 else
     echo "No mvnw or gradlew"
@@ -93,25 +94,19 @@ if [ "$RUN_APP" == 1 ]; then
         cd "$UAA_APP_FOLDER"
         java -jar target/*.war \
             --spring.profiles.active="$PROFILE" \
-            --logging.level.org.zalando=OFF \
-            --logging.level.io.github.simlife=OFF \
-            --logging.level.io.github.simlife.sample=OFF \
-            --logging.level.io.github.simlife.travis=OFF &
+            --logging.level.io.github.simlife.sample=ERROR \
+            --logging.level.io.github.simlife.travis=ERROR &
         sleep 80
     fi
 
     cd "$APP_FOLDER"
     java -jar app.war \
         --spring.profiles.active="$PROFILE" \
-        --logging.level.org.zalando=OFF \
-        --logging.level.io.github.simlife=OFF \
-        --logging.level.io.github.simlife.sample=OFF \
-        --logging.level.io.github.simlife.travis=OFF &
+        --logging.level.io.github.simlife.sample=ERROR \
+        --logging.level.io.github.simlife.travis=ERROR &
     echo $! > .pid
     sleep 40
 
     launchCurlOrProtractor
-    result=$?
     kill $(cat .pid)
-    exit $result
 fi

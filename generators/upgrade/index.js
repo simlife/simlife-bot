@@ -1,7 +1,7 @@
 /**
- * Copyright 2018 the original author or authors from the Simlife project.
+ * Copyright 2013-2018 the original author or authors from the Simlife project.
  *
- * This file is part of the Simlife project, see https://www.simlife.io/
+ * This file is part of the Simlife project, see http://www.simlife.tech/
  * for more information.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,9 +18,9 @@
  */
 
 const chalk = require('chalk');
+const BaseGenerator = require('../generator-base');
 const shelljs = require('shelljs');
 const semver = require('semver');
-const BaseGenerator = require('../generator-base');
 const constants = require('../generator-constants');
 
 /* Constants used throughout */
@@ -34,30 +34,6 @@ module.exports = class extends BaseGenerator {
     constructor(args, opts) {
         super(args, opts);
         this.force = this.options.force;
-
-        // This adds support for a `--target-version` flag
-        this.option('target-version', {
-            desc: 'Upgrade to a specific version instead of the latest',
-            type: String
-        });
-
-        // This adds support for a `--skip-install` flag
-        this.option('skip-install', {
-            desc: 'Skips installing dependencies during the upgrade process',
-            type: Boolean,
-            defaults: false
-        });
-
-        // This adds support for a `--silent` flag
-        this.option('silent', {
-            desc: 'Hides output of the generation process',
-            type: Boolean,
-            defaults: false
-        });
-
-        this.targetVersion = this.options['target-version'];
-        this.skipInstall = this.options['skip-install'];
-        this.silent = this.options.silent;
     }
 
     get initializing() {
@@ -71,6 +47,9 @@ module.exports = class extends BaseGenerator {
                 this.currentVersion = this.config.get('simlifeVersion');
                 this.clientPackageManager = this.config.get('clientPackageManager');
                 this.clientFramework = this.config.get('clientFramework');
+                this.skipInstall = this.options['skip-install'];
+                this.silent = this.options.silent;
+                this.targetVersion = this.options['target-version'];
             }
         };
     }
@@ -126,6 +105,13 @@ module.exports = class extends BaseGenerator {
 
     _regenerate(version, callback) {
         this._generate(version, () => {
+            if (this.clientFramework === 'angular1' && version === this.latestVersion) {
+                this.info('bower install');
+                const result = this.spawnCommandSync('bower', ['install']);
+                if (result.status !== 0) {
+                    this.error('bower install failed.');
+                }
+            }
             const keystore = `${SERVER_MAIN_RES_DIR}keystore.jks`;
             this.info(`Removing ${keystore}`);
             shelljs.rm('-Rf', keystore);
@@ -205,8 +191,8 @@ module.exports = class extends BaseGenerator {
                 this.gitExec(['status', '--porcelain'], { silent: this.silent }, (code, msg, err) => {
                     if (code !== 0) this.error(`Unable to check for local changes:\n${msg} ${err}`);
                     if (msg) {
-                        this.warning(' local changes found.\n'
-                            + '\tPlease commit/stash them before upgrading');
+                        this.warning(' local changes found.\n' +
+                            '\tPlease commit/stash them before upgrading');
                         this.error('Exiting process');
                     }
                     done();
@@ -249,7 +235,7 @@ module.exports = class extends BaseGenerator {
                     });
                 };
 
-                const installSimlifeLocally = (version, callback) => {
+                const installJsimlifeLocally = (version, callback) => {
                     this.log(`Installing Simlife ${version} locally`);
                     const commandPrefix = this.clientPackageManager === 'yarn' ? 'yarn add' : 'npm install';
                     const generatorCommand = `${commandPrefix} ${GENERATOR_SIMLIFE}@${version} --dev --no-lockfile --ignore-scripts`;
@@ -263,7 +249,7 @@ module.exports = class extends BaseGenerator {
 
                 const regenerate = () => {
                     this._cleanUp();
-                    installSimlifeLocally(this.currentVersion, () => {
+                    installJsimlifeLocally(this.currentVersion, () => {
                         this._regenerate(this.currentVersion, () => {
                             this._gitCheckout(this.sourceBranch, () => {
                                 // consider code up-to-date
@@ -301,7 +287,7 @@ module.exports = class extends BaseGenerator {
                 this._gitCheckout(UPGRADE_BRANCH, done);
             },
 
-            updateSimlife() {
+            updateJsimlife() {
                 this.log(chalk.yellow(`Updating ${GENERATOR_SIMLIFE} to ${this.latestVersion} . This might take some time...`));
                 const done = this.async();
                 const commandPrefix = this.clientPackageManager === 'yarn' ? 'yarn add' : 'npm install';
@@ -361,11 +347,18 @@ module.exports = class extends BaseGenerator {
                 if (code !== 0) {
                     this.error(`${installCommand} failed.`);
                 }
+                if (this.clientFramework === 'angular1') {
+                    this.info('bower install');
+                    this.spawnCommandSync('bower', ['install']);
+                }
                 done();
             });
         } else {
-            const logMsg = `Start your Webpack development server with:\n${chalk.yellow.bold(`${this.clientPackageManager} start`)}\n`;
-            this.success(logMsg);
+            if (this.clientFramework !== 'angular1') {
+                const logMsg =
+                    `Start your Webpack development server with:\n${chalk.yellow.bold(`${this.clientPackageManager} start`)}\n`;
+                this.success(logMsg);
+            }
             done();
         }
     }

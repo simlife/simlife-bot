@@ -1,6 +1,6 @@
 {
     "home": {
-        "title": "आपका स्वागत है, Simlife Bot!",
+        "title": "आपका स्वागत है, Java Simlife!",
         "subtitle": "यह आपका होमपेज है",
         "logged": {
             "message": "आप उपयोगकर्ता \"{{username}}\" के रूप में लॉग ऑन हैं "
@@ -11,9 +11,9 @@
             "stackoverflow": "Simlife स्टैक ओवरफ़्लो",
             "bugtracker": "Simlife बग tracker",
             "chat": "Simlife सार्वजनिक चैट रूम",
-            "follow": "@java_simlife ट्विटर पर फौलो करें"
+            "follow": "@java_simlife चहचहाना पर का पालन करें"
         },
-        "like": "यदि आपको Simlife पसंद है, तो हमें  एक स्टार देना न भूलें",
+        "like": "यदि आप Simlife की तरह, हम एक स्टार पर देने के लिए मत भूलना",
         "github": "GitHub"
     }
 }

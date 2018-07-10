@@ -16,6 +16,7 @@
     "messageBroker": false,
     "serviceDiscoveryType": "eureka",
     "buildTool": "maven",
+    "enableSocialSignIn": false,
     "useSass": false,
     "applicationType": "gateway",
     "testFrameworks": [

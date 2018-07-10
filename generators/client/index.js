@@ -1,7 +1,7 @@
 /**
- * Copyright 2018 the original author or authors from the Simlife project.
+ * Copyright 2013-2018 the original author or authors from the Simlife project.
  *
- * This file is part of the Simlife project, see https://www.simlife.io/
+ * This file is part of the Simlife project, see http://www.simlife.tech/
  * for more information.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -22,6 +22,7 @@ const _ = require('lodash');
 const BaseGenerator = require('../generator-base');
 const prompts = require('./prompts');
 const writeAngularFiles = require('./files-angular').writeFiles;
+const writeAngularJsFiles = require('./files-angularjs').writeFiles;
 const writeReactFiles = require('./files-react').writeFiles;
 const packagejs = require('../../package.json');
 const constants = require('../generator-constants');
@@ -71,6 +72,13 @@ module.exports = class extends BaseGenerator {
             type: String
         });
 
+        // This adds support for a `--social` flag
+        this.option('social', {
+            desc: 'Provide development DB option for the application',
+            type: Boolean,
+            default: false
+        });
+
         // This adds support for a `--search-engine` flag
         this.option('search-engine', {
             desc: 'Provide development DB option for the application',
@@ -105,13 +113,6 @@ module.exports = class extends BaseGenerator {
             defaults: false
         });
 
-        // This adds support for a `--skip-commit-hook` flag
-        this.option('skip-commit-hook', {
-            desc: 'Skip adding husky commit hooks',
-            type: Boolean,
-            defaults: false
-        });
-
         // This adds support for a `--npm` flag
         this.option('npm', {
             desc: 'Use npm instead of yarn',
@@ -128,24 +129,11 @@ module.exports = class extends BaseGenerator {
 
         this.setupClientOptions(this);
         const blueprint = this.options.blueprint || this.configOptions.blueprint || this.config.get('blueprint');
-        // use global variable since getters dont have access to instance property
-        if (!opts.fromBlueprint) {
-            useBlueprint = this.composeBlueprint(
-                blueprint,
-                'client',
-                {
-                    'skip-install': this.options['skip-install'],
-                    configOptions: this.configOptions,
-                    force: this.options.force
-                }
-            );
-        } else {
-            useBlueprint = false;
-        }
+        useBlueprint = this.composeBlueprint(blueprint, 'client'); // use global variable since getters dont have access to instance property
     }
 
-    // Public API method used by the getter and also by Blueprints
-    _initializing() {
+    get initializing() {
+        if (useBlueprint) return;
         return {
             displayLogo() {
                 if (this.logo) {
@@ -157,36 +145,31 @@ module.exports = class extends BaseGenerator {
                 // Make constants available in templates
                 this.MAIN_SRC_DIR = constants.CLIENT_MAIN_SRC_DIR;
                 this.TEST_SRC_DIR = constants.CLIENT_TEST_SRC_DIR;
-                const configuration = this.getAllSimlifeConfig(this, true);
-                this.serverPort = configuration.get('serverPort') || this.configOptions.serverPort || 8080;
-                this.applicationType = configuration.get('applicationType') || this.configOptions.applicationType;
+
+                this.serverPort = this.config.get('serverPort') || this.configOptions.serverPort || 8080;
+                this.applicationType = this.config.get('applicationType') || this.configOptions.applicationType;
                 if (!this.applicationType) {
                     this.applicationType = 'monolith';
                 }
-                this.clientFramework = configuration.get('clientFramework');
+                this.clientFramework = this.config.get('clientFramework');
                 if (!this.clientFramework) {
                     /* for backward compatibility */
-                    this.clientFramework = 'angularX';
+                    this.clientFramework = 'angular1';
                 }
                 if (this.clientFramework === 'angular2') {
                     /* for backward compatibility */
                     this.clientFramework = 'angularX';
                 }
-                this.useSass = configuration.get('useSass');
-                this.enableTranslation = configuration.get('enableTranslation'); // this is enabled by default to avoid conflicts for existing applications
-                this.nativeLanguage = configuration.get('nativeLanguage');
-                this.languages = configuration.get('languages');
+                this.useSass = this.config.get('useSass');
+                this.enableTranslation = this.config.get('enableTranslation'); // this is enabled by default to avoid conflicts for existing applications
+                this.nativeLanguage = this.config.get('nativeLanguage');
+                this.languages = this.config.get('languages');
                 this.enableI18nRTL = this.isI18nRTLSupportNecessary(this.languages);
-                this.messageBroker = configuration.get('messageBroker');
+                this.messageBroker = this.config.get('messageBroker');
                 this.packagejs = packagejs;
-                const baseName = configuration.get('baseName');
+                const baseName = this.config.get('baseName');
                 if (baseName) {
                     this.baseName = baseName;
-                }
-
-                this.serviceDiscoveryType = configuration.get('serviceDiscoveryType') === 'no' ? false : (configuration.get('serviceDiscoveryType') || this.configOptions.serviceDiscoveryType);
-                if (this.serviceDiscoveryType === undefined) {
-                    this.serviceDiscoveryType = false;
                 }
 
                 const clientConfigFound = this.useSass !== undefined;
@@ -221,13 +204,8 @@ module.exports = class extends BaseGenerator {
         };
     }
 
-    get initializing() {
+    get prompting() {
         if (useBlueprint) return;
-        return this._initializing();
-    }
-
-    // Public API method used by the getter and also by Blueprints
-    _prompting() {
         return {
             askForModuleName: prompts.askForModuleName,
             askForClient: prompts.askForClient,
@@ -241,13 +219,8 @@ module.exports = class extends BaseGenerator {
         };
     }
 
-    get prompting() {
+    get configuring() {
         if (useBlueprint) return;
-        return this._prompting();
-    }
-
-    // Public API method used by the getter and also by Blueprints
-    _configuring() {
         return {
             insight() {
                 const insight = this.insight();
@@ -274,44 +247,34 @@ module.exports = class extends BaseGenerator {
             },
 
             saveConfig() {
-                const config = {
-                    simlifeVersion: packagejs.version,
-                    applicationType: this.applicationType,
-                    baseName: this.baseName,
-                    clientFramework: this.clientFramework,
-                    useSass: this.useSass,
-                    enableTranslation: this.enableTranslation,
-                    skipCommitHook: this.skipCommitHook,
-                    clientPackageManager: this.clientPackageManager
-                };
+                this.config.set('simlifeVersion', packagejs.version);
+                this.config.set('baseName', this.baseName);
+                this.config.set('clientFramework', this.clientFramework);
+                this.config.set('useSass', this.useSass);
+                this.config.set('enableTranslation', this.enableTranslation);
                 if (this.enableTranslation && !this.configOptions.skipI18nQuestion) {
-                    config.nativeLanguage = this.nativeLanguage;
-                    config.languages = this.languages;
+                    this.config.set('nativeLanguage', this.nativeLanguage);
+                    this.config.set('languages', this.languages);
                 }
+                this.config.set('clientPackageManager', this.clientPackageManager);
                 if (this.skipServer) {
-                    this.authenticationType && (config.authenticationType = this.authenticationType);
-                    this.uaaBaseName && (config.uaaBaseName = this.uaaBaseName);
-                    this.cacheProvider && (config.cacheProvider = this.cacheProvider);
-                    this.enableHibernateCache && (config.enableHibernateCache = this.enableHibernateCache);
-                    this.websocket && (config.websocket = this.websocket);
-                    this.databaseType && (config.databaseType = this.databaseType);
-                    this.devDatabaseType && (config.devDatabaseType = this.devDatabaseType);
-                    this.prodDatabaseType && (config.prodDatabaseType = this.prodDatabaseType);
-                    this.searchEngine && (config.searchEngine = this.searchEngine);
-                    this.buildTool && (config.buildTool = this.buildTool);
+                    this.authenticationType && this.config.set('authenticationType', this.authenticationType);
+                    this.uaaBaseName && this.config.set('uaaBaseName', this.uaaBaseName);
+                    this.cacheProvider && this.config.set('cacheProvider', this.cacheProvider);
+                    this.enableHibernateCache && this.config.set('enableHibernateCache', this.enableHibernateCache);
+                    this.websocket && this.config.set('websocket', this.websocket);
+                    this.databaseType && this.config.set('databaseType', this.databaseType);
+                    this.devDatabaseType && this.config.set('devDatabaseType', this.devDatabaseType);
+                    this.prodDatabaseType && this.config.set('prodDatabaseType', this.prodDatabaseType);
+                    this.searchEngine && this.config.set('searchEngine', this.searchEngine);
+                    this.buildTool && this.config.set('buildTool', this.buildTool);
                 }
-                this.config.set(config);
             }
         };
     }
 
-    get configuring() {
+    get default() {
         if (useBlueprint) return;
-        return this._configuring();
-    }
-
-    // Public API method used by the getter and also by Blueprints
-    _default() {
         return {
             getSharedConfigOptions() {
                 if (this.configOptions.cacheProvider) {
@@ -343,6 +306,9 @@ module.exports = class extends BaseGenerator {
                 }
                 if (this.configOptions.buildTool) {
                     this.buildTool = this.configOptions.buildTool;
+                }
+                if (this.configOptions.enableSocialSignIn !== undefined) {
+                    this.enableSocialSignIn = this.configOptions.enableSocialSignIn;
                 }
                 if (this.configOptions.authenticationType) {
                     this.authenticationType = this.configOptions.authenticationType;
@@ -391,82 +357,74 @@ module.exports = class extends BaseGenerator {
         };
     }
 
-    get default() {
+    writing() {
         if (useBlueprint) return;
-        return this._default();
+        switch (this.clientFramework) {
+        case 'angular1':
+            return writeAngularJsFiles.call(this);
+        case 'react':
+            return writeReactFiles.call(this);
+        default:
+            return writeAngularFiles.call(this);
+        }
     }
 
-    // Public API method used by the getter and also by Blueprints
-    _writing() {
-        return {
-            write() {
-                switch (this.clientFramework) {
-                case 'react':
-                    return writeReactFiles.call(this, useBlueprint);
-                default:
-                    return writeAngularFiles.call(this, useBlueprint);
-                }
-            }
+    install() {
+        if (useBlueprint) return;
+        let logMsg =
+            `To install your dependencies manually, run: ${chalk.yellow.bold(`${this.clientPackageManager} install`)}`;
+
+        if (this.clientFramework === 'angular1') {
+            logMsg =
+                `To install your dependencies manually, run: ${chalk.yellow.bold(`${this.clientPackageManager} install & bower install`)}`;
+        }
+
+        const installConfig = {
+            bower: this.clientFramework === 'angular1',
+            npm: this.clientPackageManager !== 'yarn',
+            yarn: this.clientPackageManager === 'yarn'
         };
-    }
 
-    get writing() {
-        if (useBlueprint) return;
-        return this._writing();
-    }
-
-    // Public API method used by the getter and also by Blueprints
-    _install() {
-        return {
-            installing() {
-                const logMsg = `To install your dependencies manually, run: ${chalk.yellow.bold(`${this.clientPackageManager} install`)}`;
-
-                const installConfig = {
-                    bower: false,
-                    npm: this.clientPackageManager !== 'yarn',
-                    yarn: this.clientPackageManager === 'yarn'
-                };
-
-                if (this.options['skip-install']) {
+        if (this.options['skip-install']) {
+            this.log(logMsg);
+        } else {
+            this.installDependencies(installConfig).then(
+                () => {
+                    if (this.clientFramework === 'angular1') {
+                        this.spawnCommandSync('gulp', ['install']);
+                    } else {
+                        this.buildResult = this.spawnCommandSync(this.clientPackageManager, ['run', 'webpack:build']);
+                    }
+                },
+                (err) => {
+                    this.warning('Install of dependencies failed!');
                     this.log(logMsg);
-                } else {
-                    this.installDependencies(installConfig).then(
-                        () => {
-                            this.buildResult = this.spawnCommandSync(this.clientPackageManager, ['run', 'webpack:build']);
-                        },
-                        (err) => {
-                            this.warning('Install of dependencies failed!');
-                            this.log(logMsg);
-                        }
-                    );
                 }
-            }
-        };
+            );
+        }
     }
 
-    get install() {
+    end() {
         if (useBlueprint) return;
-        return this._install();
-    }
+        if (this.buildResult !== undefined && this.buildResult.status !== 0) {
+            this.error('webpack:build failed.');
+        }
+        this.log(chalk.green.bold('\nClient application generated successfully.\n'));
 
-    // Public API method used by the getter and also by Blueprints
-    _end() {
-        return {
-            end() {
-                if (this.buildResult !== undefined && this.buildResult.status !== 0) {
-                    this.error('webpack:build failed.');
-                }
-                this.log(chalk.green.bold('\nClient application generated successfully.\n'));
+        let logMsg =
+            `Start your Webpack development server with:\n ${chalk.yellow.bold(`${this.clientPackageManager} start`)}\n`;
 
-                const logMsg = `Start your Webpack development server with:\n ${chalk.yellow.bold(`${this.clientPackageManager} start`)}\n`;
-
-                this.log(chalk.green(logMsg));
-            }
-        };
-    }
-
-    get end() {
-        if (useBlueprint) return;
-        return this._end();
+        if (this.clientFramework === 'angular1') {
+            logMsg =
+                'Inject your front end dependencies into your source code:\n' +
+                ` ${chalk.yellow.bold('gulp inject')}\n\n` +
+                'Generate the AngularJS constants:\n' +
+                ` ${chalk.yellow.bold('gulp ngconstant:dev')}` +
+                `${this.useSass ? '\n\nCompile your Sass style sheets:\n\n' +
+                `${chalk.yellow.bold('gulp sass')}` : ''}\n\n` +
+                'Or do all of the above:\n' +
+                ` ${chalk.yellow.bold('gulp install')}\n`;
+        }
+        this.log(chalk.green(logMsg));
     }
 };

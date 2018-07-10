@@ -1,7 +1,7 @@
 /**
- * Copyright 2018 the original author or authors from the Simlife project.
+ * Copyright 2013-2018 the original author or authors from the Simlife project.
  *
- * This file is part of the Simlife project, see https://www.simlife.io/
+ * This file is part of the Simlife project, see http://www.simlife.tech/
  * for more information.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -29,26 +29,11 @@ module.exports = class extends BaseGenerator {
         super(args, opts);
         utils.copyObjectProps(this, this.options.context);
         const blueprint = this.config.get('blueprint');
-        if (!opts.fromBlueprint) {
-            // use global variable since getters dont have access to instance property
-            useBlueprint = this.composeBlueprint(blueprint, 'entity-i18n', {
-                context: opts.context,
-                force: opts.force,
-                debug: opts.context.isDebugEnabled,
-                'skip-install': opts.context.options['skip-install']
-            });
-        } else {
-            useBlueprint = false;
-        }
-    }
-
-    // Public API method used by the getter and also by Blueprints
-    _writing() {
-        return writeFiles();
+        useBlueprint = this.composeBlueprint(blueprint, 'entity'); // use global variable since getters dont have access to instance property
     }
 
     get writing() {
         if (useBlueprint) return;
-        return this._writing();
+        return writeFiles();
     }
 };

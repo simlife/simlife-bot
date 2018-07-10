@@ -1,7 +1,8 @@
+
 /**
- * Copyright 2018 the original author or authors from the Simlife project.
+ * Copyright 2013-2018 the original author or authors from the Simlife project.
  *
- * This file is part of the Simlife project, see https://www.simlife.io/
+ * This file is part of the Simlife project, see http://www.simlife.tech/
  * for more information.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,7 +20,7 @@
 const shelljs = require('shelljs');
 const chalk = require('chalk');
 const crypto = require('crypto');
-const dockerUtils = require('./docker-utils');
+
 /**
  * This is the Generator base class.
  * This provides all the public API methods exposed via the module system.
@@ -28,12 +29,36 @@ const dockerUtils = require('./docker-utils');
  * The method signatures in public API should not be changed without a major version change
  */
 module.exports = {
-    checkDocker: dockerUtils.checkDocker,
+    checkDocker,
     checkImages,
     generateJwtSecret,
     configureImageNames,
     setAppsFolderPaths,
 };
+
+/**
+ * Check Docker
+ */
+function checkDocker() {
+    const done = this.async();
+
+    shelljs.exec('docker -v', { silent: true }, (code, stdout, stderr) => {
+        if (stderr) {
+            this.log(chalk.red('Docker version 1.10.0 or later is not installed on your computer.\n' +
+                '         Read http://docs.docker.com/engine/installation/#installation\n'));
+        } else {
+            const dockerVersion = stdout.split(' ')[2].replace(/,/g, '');
+            const dockerVersionMajor = dockerVersion.split('.')[0];
+            const dockerVersionMinor = dockerVersion.split('.')[1];
+            if (dockerVersionMajor < 1 || (dockerVersionMajor === 1 && dockerVersionMinor < 10)) {
+                this.log(chalk.red(`${'Docker version 1.10.0 or later is not installed on your computer.\n' +
+                    '         Docker version found: '}${dockerVersion}\n` +
+                    '         Read http://docs.docker.com/engine/installation/#installation\n'));
+            }
+        }
+        done();
+    });
+}
 
 /**
  * Check Images
@@ -52,7 +77,7 @@ function checkImages() {
             runCommand = './mvnw verify -Pprod dockerfile:build';
         } else {
             imagePath = this.destinationPath(`${this.directoryPath + appsFolder}/build/docker`);
-            runCommand = './gradlew -Pprod bootWar buildDocker';
+            runCommand = './gradlew -Pprod bootRepackage buildDocker';
         }
         if (shelljs.ls(imagePath).length === 0) {
             this.warning = true;

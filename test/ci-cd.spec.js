@@ -25,6 +25,58 @@ const expectedFiles = {
 };
 
 describe('Simlife CI-CD Sub Generator', () => {
+    describe('Gradle Angular1 NPM', () => {
+        beforeEach((done) => {
+            helpers
+                .run(require.resolve('../generators/ci-cd'))
+                .inTmpDir((dir) => {
+                    fse.copySync(path.join(__dirname, './templates/ci-cd/gradle-ng1-npm'), dir);
+                })
+                .withOptions({ skipChecks: true })
+                .withPrompts({
+                    pipelines: [
+                        'jenkins',
+                        'travis',
+                        'gitlab',
+                        'circle'
+                    ]
+                })
+                .on('end', done);
+        });
+        it('creates expected files', () => {
+            assert.file(expectedFiles.travis);
+            assert.file(expectedFiles.jenkins);
+            assert.file(expectedFiles.gitlab);
+            assert.file(expectedFiles.circle);
+        });
+    });
+
+    describe('Gradle Angular1 Yarn', () => {
+        beforeEach((done) => {
+            helpers
+                .run(require.resolve('../generators/ci-cd'))
+                .inTmpDir((dir) => {
+                    fse.copySync(path.join(__dirname, './templates/ci-cd/gradle-ng1-yarn'), dir);
+                })
+                .withOptions({ skipChecks: true })
+                .withPrompts({
+                    pipelines: [
+                        'jenkins',
+                        'travis',
+                        'gitlab',
+                        'circle'
+                    ]
+                })
+                .on('end', done);
+        });
+        it('creates expected files', () => {
+            assert.file(expectedFiles.travis);
+            assert.file(expectedFiles.jenkins);
+            assert.file(expectedFiles.gitlab);
+            assert.file(expectedFiles.circle);
+        });
+    });
+
     describe('Gradle Angular2 NPM', () => {
         beforeEach((done) => {
             helpers
@@ -57,6 +109,58 @@ describe('Simlife CI-CD Sub Generator', () => {
                 .run(require.resolve('../generators/ci-cd'))
                 .inTmpDir((dir) => {
                     fse.copySync(path.join(__dirname, './templates/ci-cd/gradle-ng2-yarn'), dir);
+                })
+                .withOptions({ skipChecks: true })
+                .withPrompts({
+                    pipelines: [
+                        'jenkins',
+                        'travis',
+                        'gitlab',
+                        'circle'
+                    ]
+                })
+                .on('end', done);
+        });
+        it('creates expected files', () => {
+            assert.file(expectedFiles.travis);
+            assert.file(expectedFiles.jenkins);
+            assert.file(expectedFiles.gitlab);
+            assert.file(expectedFiles.circle);
+        });
+    });
+
+    describe('Maven Angular1 NPM', () => {
+        beforeEach((done) => {
+            helpers
+                .run(require.resolve('../generators/ci-cd'))
+                .inTmpDir((dir) => {
+                    fse.copySync(path.join(__dirname, './templates/ci-cd/maven-ng1-npm'), dir);
+                })
+                .withOptions({ skipChecks: true })
+                .withPrompts({
+                    pipelines: [
+                        'jenkins',
+                        'travis',
+                        'gitlab',
+                        'circle'
+                    ]
+                })
+                .on('end', done);
+        });
+        it('creates expected files', () => {
+            assert.file(expectedFiles.travis);
+            assert.file(expectedFiles.jenkins);
+            assert.file(expectedFiles.gitlab);
+            assert.file(expectedFiles.circle);
+        });
+    });
+
+    describe('Maven Angular1 Yarn', () => {
+        beforeEach((done) => {
+            helpers
+                .run(require.resolve('../generators/ci-cd'))
+                .inTmpDir((dir) => {
+                    fse.copySync(path.join(__dirname, './templates/ci-cd/maven-ng1-yarn'), dir);
                 })
                 .withOptions({ skipChecks: true })
                 .withPrompts({

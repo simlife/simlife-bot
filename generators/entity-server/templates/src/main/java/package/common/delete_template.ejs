@@ -1,7 +1,7 @@
 <%#
- Copyright 2018 the original author or authors from the Simlife project.
+ Copyright 2013-2018 the original author or authors from the Simlife project.
 
- This file is part of the Simlife project, see https://www.simlife.io/
+ This file is part of the Simlife project, see http://www.simlife.tech/
  for more information.
 
  Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,11 +16,11 @@
  See the License for the specific language governing permissions and
  limitations under the License.
 -%>
-<%_ if (!viaService) { %>
-        <%= entityInstance %>Repository.deleteById(id);
-        <%_ if (searchEngine === 'elasticsearch') { _%>
-        <%= entityInstance %>SearchRepository.deleteById(id);
-        <%_ } _%>
-<%_ } else { _%>
-        <%= entityInstance %>Service.delete(id);
-<%_ } _%>
+<% if (!viaService) {
+    if (databaseType === 'sql' || databaseType === 'mongodb' || databaseType === 'couchbase') { %>
+        <%= entityInstance %>Repository.delete(id);<% } %><% if (databaseType === 'cassandra') { %>
+        <%= entityInstance %>Repository.delete(UUID.fromString(id));<% } %><% if (searchEngine === 'elasticsearch') { %><% if (databaseType === 'sql' || databaseType === 'mongodb' || databaseType === 'couchbase') { %>
+        <%= entityInstance %>SearchRepository.delete(id);<% } %><% if (databaseType === 'cassandra') { %>
+        <%= entityInstance %>SearchRepository.delete(UUID.fromString(id));<% } %><% }
+} else { %>
+        <%= entityInstance %>Service.delete(id);<% } %>
