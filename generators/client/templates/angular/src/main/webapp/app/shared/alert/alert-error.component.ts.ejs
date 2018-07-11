@@ -20,7 +20,7 @@ import { Component, OnDestroy } from '@angular/core';
 <%_ if (enableTranslation) { _%>
 import { TranslateService } from '@ngx-translate/core';
 <%_ } _%>
-import { JhiEventManager, JhiAlertService } from 'ng-simlife';
+import { SimEventManager, SimAlertService } from 'ng-simlife';
 import { Subscription } from 'rxjs';
 
 @Component({
@@ -39,7 +39,7 @@ export class <%=simPrefixCapitalized%>AlertErrorComponent implements OnDestroy {
     alerts: any[];
     cleanHttpErrorListener: Subscription;
     /* tslint:disable */
-    constructor(private alertService: JhiAlertService, private eventManager: JhiEventManager<% if (enableTranslation) { %>, private translateService: TranslateService<% } %>) {
+    constructor(private alertService: SimAlertService, private eventManager: SimEventManager<% if (enableTranslation) { %>, private translateService: TranslateService<% } %>) {
     /* tslint:enable */
         this.alerts = [];
 

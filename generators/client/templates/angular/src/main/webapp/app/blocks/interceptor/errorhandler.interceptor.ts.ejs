@@ -16,14 +16,14 @@
  See the License for the specific language governing permissions and
  limitations under the License.
 -%>
-import { JhiEventManager } from 'ng-simlife';
+import { SimEventManager } from 'ng-simlife';
 import { HttpInterceptor, HttpRequest, HttpErrorResponse, HttpHandler, HttpEvent } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
 
 export class ErrorHandlerInterceptor implements HttpInterceptor {
 
-    constructor(private eventManager: JhiEventManager) {
+    constructor(private eventManager: SimEventManager) {
     }
 
     intercept(request: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {

@@ -23,7 +23,7 @@ _%>
 import { ComponentFixture, TestBed, inject, fakeAsync, tick } from '@angular/core/testing';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { Observable, of } from 'rxjs';
-import { JhiEventManager } from 'ng-simlife';
+import { SimEventManager } from 'ng-simlife';
 
 import { <%=angularXAppName%>TestModule } from '../../../<%= entityParentPathAddition %>test.module';
 import { <%= entityAngularName %>DeleteDialogComponent } from 'app/entities/<%= entityFolderName %>/<%= entityFileName %>-delete-dialog.component';
@@ -48,7 +48,7 @@ describe('Component Tests', () => {
             fixture = TestBed.createComponent(<%= entityAngularName %>DeleteDialogComponent);
             comp = fixture.componentInstance;
             service = fixture.debugElement.injector.get(<%= entityAngularName %>Service);
-            mockEventManager = fixture.debugElement.injector.get(JhiEventManager);
+            mockEventManager = fixture.debugElement.injector.get(SimEventManager);
             mockActiveModal = fixture.debugElement.injector.get(NgbActiveModal);
         });
 

@@ -17,7 +17,7 @@
  limitations under the License.
 -%>
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { JhiAlertService } from 'ng-simlife';
+import { SimAlertService } from 'ng-simlife';
 
 @Component({
     selector: '<%= simPrefixDashed %>-alert',
@@ -33,7 +33,7 @@ import { JhiAlertService } from 'ng-simlife';
 export class <%=simPrefixCapitalized%>AlertComponent implements OnInit, OnDestroy {
     alerts: any[];
 
-    constructor(private alertService: JhiAlertService) { }
+    constructor(private alertService: SimAlertService) { }
 
     ngOnInit() {
         this.alerts = this.alertService.get();

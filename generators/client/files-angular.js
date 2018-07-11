@@ -533,7 +533,7 @@ const files = {
             templates: [
                 'e2e/account/account.spec.ts',
                 'e2e/admin/administration.spec.ts',
-                'e2e/page-objects/jhi-page-objects.ts',
+                'e2e/page-objects/sim-page-objects.ts',
                 'protractor.conf.js'
             ]
         }

@@ -24,7 +24,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { ActivatedRoute } from '@angular/router';
 <%_ } _%>
 import { Subscription } from 'rxjs';
-import { JhiEventManager, <% if (pagination !== 'no') { %>JhiParseLinks, <% } %>JhiAlertService<% if (fieldsContainBlob) { %>, JhiDataUtils<% } %> } from 'ng-simlife';
+import { SimEventManager, <% if (pagination !== 'no') { %>SimParseLinks, <% } %>SimAlertService<% if (fieldsContainBlob) { %>, SimDataUtils<% } %> } from 'ng-simlife';
 
 import { I<%= entityAngularName %> } from 'app/shared/model/<%= entityModelFileName %>.model';
 import { Principal } from 'app/core';
@@ -113,6 +113,6 @@ export class <%= entityAngularName %>Component implements OnInit, OnDestroy {
     <%_ }} _%>
 
     private onError(errorMessage: string) {
-        this.jhiAlertService.error(errorMessage, null, null);
+        this.simAlertService.error(errorMessage, null, null);
     }
 }

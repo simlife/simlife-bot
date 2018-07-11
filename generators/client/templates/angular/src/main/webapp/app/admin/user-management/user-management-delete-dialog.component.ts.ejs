@@ -18,7 +18,7 @@
 -%>
 import { Component } from '@angular/core';
 import { NgbActiveModal} from '@ng-bootstrap/ng-bootstrap';
-import { JhiEventManager } from 'ng-simlife';
+import { SimEventManager } from 'ng-simlife';
 
 import { User, UserService } from 'app/core';
 
@@ -33,7 +33,7 @@ export class UserMgmtDeleteDialogComponent {
     constructor(
         private userService: UserService,
         public activeModal: NgbActiveModal,
-        private eventManager: JhiEventManager
+        private eventManager: SimEventManager
     ) {
     }
 

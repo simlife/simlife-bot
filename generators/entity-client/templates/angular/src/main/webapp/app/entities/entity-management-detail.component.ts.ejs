@@ -19,7 +19,7 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 <%_ if (fieldsContainBlob) { _%>
-import { JhiDataUtils } from 'ng-simlife';
+import { SimDataUtils } from 'ng-simlife';
 <%_ } _%>
 
 import { I<%= entityAngularName %> } from 'app/shared/model/<%= entityModelFileName %>.model';
@@ -34,7 +34,7 @@ export class <%= entityAngularName %>DetailComponent implements OnInit {
 
     constructor(
         <%_ if (fieldsContainBlob) { _%>
-        private dataUtils: JhiDataUtils,
+        private dataUtils: SimDataUtils,
         <%_ } _%>
         private activatedRoute: ActivatedRoute
     ) {

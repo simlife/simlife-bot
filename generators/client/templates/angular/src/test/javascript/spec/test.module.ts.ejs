@@ -22,14 +22,14 @@ import { NgModule, ElementRef, Renderer } from '@angular/core';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { NgbActiveModal, NgbModal } from '@ng-bootstrap/ng-bootstrap';
 <%_ if (enableTranslation) { _%>
-import { JhiLanguageService, JhiDataUtils, JhiDateUtils, JhiEventManager, JhiAlertService, JhiParseLinks } from 'ng-simlife';
+import { SimLanguageService, SimDataUtils, SimDateUtils, SimEventManager, SimAlertService, SimParseLinks } from 'ng-simlife';
 
 import { MockLanguageService, MockLanguageHelper } from './helpers/mock-language.service';
-import { JhiLanguageHelper, Principal, AccountService<% if (authenticationType !== 'oauth2') { %>, LoginModalService<% } %><% if (websocket === 'spring-websocket') { %>, <%=simPrefixCapitalized%>TrackerService<% } %> } from 'app/core';
+import { SimLanguageHelper, Principal, AccountService<% if (authenticationType !== 'oauth2') { %>, LoginModalService<% } %><% if (websocket === 'spring-websocket') { %>, <%=simPrefixCapitalized%>TrackerService<% } %> } from 'app/core';
 <%_ } else { _%>
-import { JhiDataUtils, JhiDateUtils, JhiEventManager, JhiAlertService, JhiParseLinks } from 'ng-simlife';
+import { SimDataUtils, SimDateUtils, SimEventManager, SimAlertService, SimParseLinks } from 'ng-simlife';
 
-import { Principal, AccountService<% if (authenticationType !== 'oauth2') { %>, LoginModalService<% } %><% if (websocket === 'spring-websocket') { %>, JhiTrackerService<% } %> } from 'app/core';
+import { Principal, AccountService<% if (authenticationType !== 'oauth2') { %>, LoginModalService<% } %><% if (websocket === 'spring-websocket') { %>, SimTrackerService<% } %> } from 'app/core';
 <%_ } _%>
 import { MockPrincipal } from './helpers/mock-principal.service';
 import { MockAccountService } from './helpers/mock-account.service';
@@ -43,16 +43,16 @@ _%>
 @NgModule({
     providers: [
         DatePipe,
-        JhiDataUtils,
-        JhiDateUtils,
-        JhiParseLinks,
+        SimDataUtils,
+        SimDateUtils,
+        SimParseLinks,
         <%_ if (enableTranslation) { _%>
         {
-            provide: JhiLanguageService,
+            provide: SimLanguageService,
             useClass: MockLanguageService
         },
         {
-            provide: JhiLanguageHelper,
+            provide: SimLanguageHelper,
             useClass: MockLanguageHelper
         },
         <%_ } _%>
@@ -63,7 +63,7 @@ _%>
         },
         <%_ } _%>
         {
-            provide: JhiEventManager,
+            provide: SimEventManager,
             useClass:  MockEventManager
         },
         {
@@ -101,7 +101,7 @@ _%>
             useValue: null
         },
         {
-            provide: JhiAlertService,
+            provide: SimAlertService,
             useValue: null
         },
         {

@@ -17,7 +17,7 @@
  limitations under the License.
 -%>
 import { browser, <% if ( fieldsContainInstant || fieldsContainZonedDateTime ) { %>protractor<% } %> } from 'protractor';
-import { NavBarPage } from './../../<%= entityParentPathAddition %>page-objects/jhi-page-objects';
+import { NavBarPage } from './../../<%= entityParentPathAddition %>page-objects/sim-page-objects';
 import { <%= entityClass %>ComponentsPage, <%= entityClass %>UpdatePage } from './<%= entityFileName %>.page-object';
 <%_ if (fieldsContainBlobOrImage) { _%>
 import * as path from 'path';

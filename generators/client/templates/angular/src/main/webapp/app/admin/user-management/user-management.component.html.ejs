@@ -27,19 +27,19 @@
     <div class="table-responsive" *ngIf="users">
         <table class="table table-striped">
             <thead>
-            <tr<% if (databaseType !== 'cassandra') { %> jhiSort [(predicate)]="predicate" [(ascending)]="reverse" [callback]="transition.bind(this)"<% } %>>
-                <th<% if (databaseType !== 'cassandra') { %> jhiSortBy="id"<% } %>><span simTranslate="global.field.id">ID</span><% if (databaseType !== 'cassandra') { %> <fa-icon [icon]="'sort'"></fa-icon><% } %></th>
-                <th<% if (databaseType !== 'cassandra') { %> jhiSortBy="login"<% } %>><span simTranslate="userManagement.login">Login</span><% if (databaseType !== 'cassandra') { %> <fa-icon [icon]="'sort'"></fa-icon><% } %></th>
-                <th<% if (databaseType !== 'cassandra') { %> jhiSortBy="email"<% } %>><span simTranslate="userManagement.email">Email</span><% if (databaseType !== 'cassandra') { %> <fa-icon [icon]="'sort'"></fa-icon><% } %></th>
+            <tr<% if (databaseType !== 'cassandra') { %> simSort [(predicate)]="predicate" [(ascending)]="reverse" [callback]="transition.bind(this)"<% } %>>
+                <th<% if (databaseType !== 'cassandra') { %> simSortBy="id"<% } %>><span simTranslate="global.field.id">ID</span><% if (databaseType !== 'cassandra') { %> <fa-icon [icon]="'sort'"></fa-icon><% } %></th>
+                <th<% if (databaseType !== 'cassandra') { %> simSortBy="login"<% } %>><span simTranslate="userManagement.login">Login</span><% if (databaseType !== 'cassandra') { %> <fa-icon [icon]="'sort'"></fa-icon><% } %></th>
+                <th<% if (databaseType !== 'cassandra') { %> simSortBy="email"<% } %>><span simTranslate="userManagement.email">Email</span><% if (databaseType !== 'cassandra') { %> <fa-icon [icon]="'sort'"></fa-icon><% } %></th>
                 <th></th>
                 <%_ if (enableTranslation) { _%>
-                <th<% if (databaseType !== 'cassandra') { %> jhiSortBy="langKey"<% } %>> <span simTranslate="userManagement.langKey">Lang Key</span><% if (databaseType !== 'cassandra') { %> <fa-icon [icon]="'sort'"></fa-icon><% } %></th>
+                <th<% if (databaseType !== 'cassandra') { %> simSortBy="langKey"<% } %>> <span simTranslate="userManagement.langKey">Lang Key</span><% if (databaseType !== 'cassandra') { %> <fa-icon [icon]="'sort'"></fa-icon><% } %></th>
                 <%_ } _%>
                 <th><span simTranslate="userManagement.profiles">Profiles</span></th>
                 <%_ if (databaseType !== 'cassandra') { _%>
-                <th jhiSortBy="createdDate"><span simTranslate="userManagement.createdDate">Created Date</span> <fa-icon [icon]="'sort'"></fa-icon></th>
-                <th jhiSortBy="lastModifiedBy"><span simTranslate="userManagement.lastModifiedBy">Last Modified By</span> <fa-icon [icon]="'sort'"></fa-icon></th>
-                <th jhiSortBy="lastModifiedDate"><span simTranslate="userManagement.lastModifiedDate">Last Modified Date</span> <fa-icon [icon]="'sort'"></fa-icon></th>
+                <th simSortBy="createdDate"><span simTranslate="userManagement.createdDate">Created Date</span> <fa-icon [icon]="'sort'"></fa-icon></th>
+                <th simSortBy="lastModifiedBy"><span simTranslate="userManagement.lastModifiedBy">Last Modified By</span> <fa-icon [icon]="'sort'"></fa-icon></th>
+                <th simSortBy="lastModifiedDate"><span simTranslate="userManagement.lastModifiedDate">Last Modified Date</span> <fa-icon [icon]="'sort'"></fa-icon></th>
                 <%_ } _%>
                 <th></th>
             </tr>
@@ -95,7 +95,7 @@
     <%_ if (databaseType !== 'cassandra') { _%>
     <div *ngIf="users">
         <div class="row justify-content-center">
-            <jhi-item-count [page]="page" [total]="queryCount" [itemsPerPage]="itemsPerPage"></jhi-item-count>
+            <sim-item-count [page]="page" [total]="queryCount" [itemsPerPage]="itemsPerPage"></sim-item-count>
         </div>
         <div class="row justify-content-center">
             <ngb-pagination [collectionSize]="totalItems" [(page)]="page" [pageSize]="itemsPerPage" [maxSize]="5" [rotate]="true" [boundaryLinks]="true" (pageChange)="loadPage(page)"></ngb-pagination>

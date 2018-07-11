@@ -1,6 +1,6 @@
 {
   "name": "simlife-bot",
-  "version": "5.0.2",
+  "version": "5.0.3",
   "description": "Spring Boot + Angular/React in one handy generator",
   "files": [
     "cli",

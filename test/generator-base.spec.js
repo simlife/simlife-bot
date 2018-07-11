@@ -1,7 +1,7 @@
 /* global describe, before, it */
 
 const expect = require('chai').expect;
-const jhiCore = require('simlife-core');
+const simCore = require('simlife-core');
 const expectedFiles = require('./utils/expected-files');
 const BaseGenerator = require('../generators/generator-base').prototype;
 
@@ -55,14 +55,14 @@ describe('Generator Base', () => {
                         angularJSSuffix: 'mySuffix'
                     }
                 };
-                jhiCore.exportEntities({
+                simCore.exportEntities({
                     entities,
                     forceNoFiltering: true,
                     application: {}
                 });
                 BaseGenerator.getExistingEntities();
                 entities.Region.fields.push({ fieldName: 'regionDesc', fieldType: 'String' });
-                jhiCore.exportEntities({
+                simCore.exportEntities({
                     entities,
                     forceNoFiltering: true,
                     application: {}

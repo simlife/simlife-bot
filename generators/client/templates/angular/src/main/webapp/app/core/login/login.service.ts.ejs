@@ -18,7 +18,7 @@
 -%>
 import { Injectable } from '@angular/core';
 <%_ if (enableTranslation && !(authenticationType === 'oauth2')) { _%>
-import { JhiLanguageService } from 'ng-simlife';
+import { SimLanguageService } from 'ng-simlife';
 <%_ } _%>
 
 import { Principal } from '../auth/principal.service';
@@ -36,7 +36,7 @@ export class LoginService {
 
     constructor(
         <%_ if (enableTranslation && !(authenticationType === 'oauth2')) { _%>
-        private languageService: JhiLanguageService,
+        private languageService: SimLanguageService,
         <%_ } _%>
         private principal: Principal,
         <%_ if (websocket === 'spring-websocket') { _%>

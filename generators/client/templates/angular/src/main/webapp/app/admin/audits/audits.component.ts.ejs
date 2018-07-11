@@ -20,7 +20,7 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { HttpResponse } from '@angular/common/http';
 import { DatePipe } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
-import { JhiParseLinks, JhiAlertService } from 'ng-simlife';
+import { SimParseLinks, SimAlertService } from 'ng-simlife';
 
 import { ITEMS_PER_PAGE } from 'app/shared';
 import { Audit } from './audit.model';
@@ -46,8 +46,8 @@ export class AuditsComponent implements OnInit, OnDestroy {
 
     constructor(
         private auditsService: AuditsService,
-        private alertService: JhiAlertService,
-        private parseLinks: JhiParseLinks,
+        private alertService: SimAlertService,
+        private parseLinks: SimParseLinks,
         private activatedRoute: ActivatedRoute,
         private datePipe: DatePipe,
         private router: Router

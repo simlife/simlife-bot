@@ -17,9 +17,9 @@
  limitations under the License.
 -%>
 import { Component, OnInit } from '@angular/core';
-import { JhiLanguageService } from 'ng-simlife';
+import { SimLanguageService } from 'ng-simlife';
 
-import { Principal, AccountService<% if (enableTranslation) { %>, JhiLanguageHelper<% } %> } from 'app/core';
+import { Principal, AccountService<% if (enableTranslation) { %>, SimLanguageHelper<% } %> } from 'app/core';
 
 @Component({
     selector: '<%= simPrefixDashed %>-settings',
@@ -34,8 +34,8 @@ export class SettingsComponent implements OnInit {
     constructor(
         private account: AccountService,
         private principal: Principal<% if (enableTranslation) { %>,
-        private languageService: JhiLanguageService,
-        private languageHelper: JhiLanguageHelper<% } %>
+        private languageService: SimLanguageService,
+        private languageHelper: SimLanguageHelper<% } %>
     ) {
     }
 

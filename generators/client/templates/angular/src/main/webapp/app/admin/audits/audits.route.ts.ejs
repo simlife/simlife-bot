@@ -18,7 +18,7 @@
 -%>
 import { Injectable } from '@angular/core';
 import { Resolve, ActivatedRouteSnapshot, RouterStateSnapshot, Route } from '@angular/router';
-import { JhiPaginationUtil, JhiResolvePagingParams } from 'ng-simlife';
+import { SimPaginationUtil, SimResolvePagingParams } from 'ng-simlife';
 
 import { AuditsComponent } from './audits.component';
 
@@ -26,7 +26,7 @@ export const auditsRoute: Route = {
     path: 'audits',
     component: AuditsComponent,
     resolve: {
-        'pagingParams': JhiResolvePagingParams
+        'pagingParams': SimResolvePagingParams
     },
     data: {
         pageTitle: 'audits.title',

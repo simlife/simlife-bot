@@ -26,7 +26,7 @@ import { Observable, of } from 'rxjs';
 
 import { <%=angularXAppName%>TestModule } from '../../../test.module';
 import { UserMgmtUpdateComponent } from 'app/admin/user-management/user-management-update.component';
-import { UserService, User<% if (enableTranslation) { %>, JhiLanguageHelper<% } %> } from 'app/core';
+import { UserService, User<% if (enableTranslation) { %>, SimLanguageHelper<% } %> } from 'app/core';
 
 describe('Component Tests', () => {
 
@@ -59,7 +59,7 @@ describe('Component Tests', () => {
             comp = fixture.componentInstance;
             service = fixture.debugElement.injector.get(UserService);
             <%_ if (enableTranslation) { _%>
-            mockLanguageHelper = fixture.debugElement.injector.get(JhiLanguageHelper);
+            mockLanguageHelper = fixture.debugElement.injector.get(SimLanguageHelper);
             <%_ } _%>
         });
 

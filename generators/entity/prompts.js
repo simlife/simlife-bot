@@ -19,7 +19,7 @@
 const chalk = require('chalk');
 const path = require('path');
 const _ = require('lodash');
-const jhiCore = require('simlife-core');
+const simCore = require('simlife-core');
 const shelljs = require('shelljs');
 
 module.exports = {
@@ -454,9 +454,9 @@ function askForField(done) {
                     return 'Your field name cannot start with an upper case letter';
                 } if (input === 'id' || fieldNamesUnderscored.includes(_.snakeCase(input))) {
                     return 'Your field name cannot use an already existing field name';
-                } if ((clientFramework === undefined || clientFramework === 'angularX') && jhiCore.isReservedFieldName(input, 'angularX')) {
+                } if ((clientFramework === undefined || clientFramework === 'angularX') && simCore.isReservedFieldName(input, 'angularX')) {
                     return 'Your field name cannot contain a Java or Angular reserved keyword';
-                } if ((clientFramework !== undefined || clientFramework === 'react') && jhiCore.isReservedFieldName(input, 'react')) {
+                } if ((clientFramework !== undefined || clientFramework === 'react') && simCore.isReservedFieldName(input, 'react')) {
                     return 'Your field name cannot contain a Java or React reserved keyword';
                 } if (prodDatabaseType === 'oracle' && input.length > 30 && !skipCheckLengthOfIdentifier) {
                     return 'The field name cannot be of more than 30 characters';
@@ -536,7 +536,7 @@ function askForField(done) {
             validate: (input) => {
                 if (input === '') {
                     return 'Your class name cannot be empty.';
-                } if (jhiCore.isReservedKeyword(input, 'JAVA')) {
+                } if (simCore.isReservedKeyword(input, 'JAVA')) {
                     return 'Your enum name cannot contain a Java reserved keyword';
                 }
                 if (!/^[A-Za-z0-9_]*$/.test(input)) {
@@ -893,7 +893,7 @@ function askForRelationship(done) {
                     return 'Your other entity name cannot contain special characters';
                 } if (input === '') {
                     return 'Your other entity name cannot be empty';
-                } if (jhiCore.isReservedKeyword(input, 'JAVA')) {
+                } if (simCore.isReservedKeyword(input, 'JAVA')) {
                     return 'Your other entity name cannot contain a Java reserved keyword';
                 } if ((input.toLowerCase() === 'user') && (context.applicationType === 'microservice')) {
                     return 'Your entity cannot have a relationship with User because it\'s a gateway entity';
@@ -915,7 +915,7 @@ function askForRelationship(done) {
                     return 'Your relationship cannot start with an upper case letter';
                 } if (input === 'id' || fieldNamesUnderscored.includes(_.snakeCase(input))) {
                     return 'Your relationship cannot use an already existing field name';
-                } if (jhiCore.isReservedKeyword(input, 'JAVA')) {
+                } if (simCore.isReservedKeyword(input, 'JAVA')) {
                     return 'Your relationship cannot contain a Java reserved keyword';
                 }
                 return true;

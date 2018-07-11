@@ -16,7 +16,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-const jhiCore = require('simlife-core');
+const simCore = require('simlife-core');
 
 module.exports = {
     askForControllerActions
@@ -42,7 +42,7 @@ function askForControllerActions() {
                         return 'Your action name cannot be empty';
                     } if (input.charAt(0) === input.charAt(0).toUpperCase()) {
                         return 'Your action name cannot start with an upper case letter';
-                    } if (jhiCore.isReservedFieldName(input)) {
+                    } if (simCore.isReservedFieldName(input)) {
                         return 'Your action name cannot contain a Java, Angular or React reserved keyword';
                     }
 

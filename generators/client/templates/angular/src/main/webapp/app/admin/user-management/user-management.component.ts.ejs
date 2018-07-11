@@ -22,11 +22,11 @@ import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 
 <%_ if (prodDatabaseType !== 'cassandra') { _%>
 import { ActivatedRoute, Router } from '@angular/router';
-import { JhiEventManager, JhiParseLinks, JhiAlertService } from 'ng-simlife';
+import { SimEventManager, SimParseLinks, SimAlertService } from 'ng-simlife';
 
 import { ITEMS_PER_PAGE } from 'app/shared';
 <%_ } else { _%>
-import { JhiEventManager, JhiAlertService } from 'ng-simlife';
+import { SimEventManager, SimAlertService } from 'ng-simlife';
 <%_ } _%>
 import { Principal, UserService, User } from 'app/core';
 import { UserMgmtDeleteDialogComponent } from 'app/admin';
@@ -55,14 +55,14 @@ export class UserMgmtComponent implements OnInit, OnDestroy {
 
     constructor(
         private userService: UserService,
-        private alertService: JhiAlertService,
+        private alertService: SimAlertService,
         private principal: Principal,
         <%_ if (prodDatabaseType !== 'cassandra') { _%>
-        private parseLinks: JhiParseLinks,
+        private parseLinks: SimParseLinks,
         private activatedRoute: ActivatedRoute,
         private router: Router,
         <%_ } _%>
-        private eventManager: JhiEventManager,
+        private eventManager: SimEventManager,
         private modalService: NgbModal,
     ) {
         <%_ if (databaseType !== 'cassandra') { _%>

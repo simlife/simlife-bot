@@ -20,7 +20,7 @@ import { Component, OnInit } from '@angular/core';
 <%_ if (authenticationType !== 'oauth2') { _%>
 import { NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 <%_ } _%>
-import { JhiEventManager } from 'ng-simlife';
+import { SimEventManager } from 'ng-simlife';
 
 import { <% if (authenticationType !== 'oauth2') { %>LoginModalService<% } else { %>LoginService<% } %>, Principal, Account } from 'app/core';
 
@@ -49,7 +49,7 @@ export class HomeComponent implements OnInit {
         <%_ } else { _%>
         private loginService: LoginService,
         <%_ } _%>
-        private eventManager: JhiEventManager
+        private eventManager: SimEventManager
     ) {
     }
 

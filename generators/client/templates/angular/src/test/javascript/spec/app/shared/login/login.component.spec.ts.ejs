@@ -19,7 +19,7 @@ limitations under the License.
 import { ComponentFixture, TestBed, async, inject, fakeAsync, tick } from '@angular/core/testing';
 import { Router } from '@angular/router';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
-import { JhiEventManager } from 'ng-simlife';
+import { SimEventManager } from 'ng-simlife';
 
 import { LoginService } from 'app/core/login/login.service';
 import { <%=simPrefixCapitalized%>LoginModalComponent } from 'app/shared/login/login.component';
@@ -65,7 +65,7 @@ describe('Component Tests', () => {
             mockLoginService = fixture.debugElement.injector.get(LoginService);
             mockStateStorageService = fixture.debugElement.injector.get(StateStorageService);
             mockRouter = fixture.debugElement.injector.get(Router);
-            mockEventManager = fixture.debugElement.injector.get(JhiEventManager);
+            mockEventManager = fixture.debugElement.injector.get(SimEventManager);
             mockActiveModal = fixture.debugElement.injector.get(NgbActiveModal);
         });
 

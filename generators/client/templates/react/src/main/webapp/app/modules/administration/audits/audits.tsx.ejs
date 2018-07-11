@@ -23,7 +23,7 @@ import { Input, Row, Table } from 'reactstrap';
 import {
   Translate,
   TextFormat,
-  JhiPagination,
+  SimPagination,
   getPaginationItemsNumber,
   getSortState,
   IPaginationBaseState
@@ -146,7 +146,7 @@ export class AuditsPage extends React.Component<IAuditsPageProps, IAuditsPageSta
           </tbody>
         </Table>
         <Row className="justify-content-center">
-          <JhiPagination
+          <SimPagination
             items={getPaginationItemsNumber(totalItems, this.state.itemsPerPage)}
             activePage={this.state.activePage}
             onSelect={this.handlePagination}

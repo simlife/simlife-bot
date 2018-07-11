@@ -26,7 +26,7 @@
                 <dt><span simTranslate="userManagement.login">Login</span></dt>
                 <dd>
                     <span>{{user.login}}</span>
-                    <jhi-boolean
+                    <sim-boolean
                         [value]="user.activated"
                     <%_ if (enableTranslation) { _%>
                         [textTrue]="'userManagement.activated' | translate"
@@ -35,7 +35,7 @@
                         textTrue="Activated"
                         textFalse="Deactivated">
                     <%_ } _%>
-                    </jhi-boolean>
+                    </sim-boolean>
                 </dd>
                 <dt><span simTranslate="userManagement.firstName">First Name</span></dt>
                 <dd>{{user.firstName}}</dd>

@@ -19,7 +19,7 @@
 import { ComponentFixture, TestBed, async, inject, fakeAsync, tick } from '@angular/core/testing';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { Observable, of } from 'rxjs';
-import { JhiEventManager } from 'ng-simlife';
+import { SimEventManager } from 'ng-simlife';
 
 import { <%=angularXAppName%>TestModule } from '../../../test.module';
 import { UserMgmtDeleteDialogComponent } from 'app/admin/user-management/user-management-delete-dialog.component';
@@ -47,7 +47,7 @@ describe('Component Tests', () => {
             fixture = TestBed.createComponent(UserMgmtDeleteDialogComponent);
             comp = fixture.componentInstance;
             service = fixture.debugElement.injector.get(UserService);
-            mockEventManager = fixture.debugElement.injector.get(JhiEventManager);
+            mockEventManager = fixture.debugElement.injector.get(SimEventManager);
             mockActiveModal = fixture.debugElement.injector.get(NgbActiveModal);
         });
 

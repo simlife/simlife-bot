@@ -19,7 +19,7 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 
-import { <% if (enableTranslation) { %>JhiLanguageHelper,<% } %> User, UserService } from 'app/core';
+import { <% if (enableTranslation) { %>SimLanguageHelper,<% } %> User, UserService } from 'app/core';
 
 @Component({
     selector: '<%= simPrefixDashed %>-user-mgmt-update',
@@ -34,7 +34,7 @@ export class UserMgmtUpdateComponent implements OnInit {
 
     constructor(
         <%_ if (enableTranslation) { _%>
-        private languageHelper: JhiLanguageHelper,
+        private languageHelper: SimLanguageHelper,
         <%_ } _%>
         private userService: UserService,
         private route: ActivatedRoute,

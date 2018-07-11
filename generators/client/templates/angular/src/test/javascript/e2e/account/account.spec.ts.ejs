@@ -17,7 +17,7 @@
  limitations under the License.
 -%>
 import { browser, element, by<% if (authenticationType === 'oauth2') { _%>, ExpectedConditions as ec<%_ } %> } from 'protractor';
-import { NavBarPage, SignInPage<%_ if (authenticationType !== 'oauth2') { _%>, PasswordPage, SettingsPage<%_ } _%> } from './../page-objects/jhi-page-objects';
+import { NavBarPage, SignInPage<%_ if (authenticationType !== 'oauth2') { _%>, PasswordPage, SettingsPage<%_ } _%> } from './../page-objects/sim-page-objects';
 <%_
 let elementGetter = `getText()`;
 if (enableTranslation) {

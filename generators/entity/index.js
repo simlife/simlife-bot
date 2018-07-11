@@ -21,7 +21,7 @@ const chalk = require('chalk');
 const _ = require('lodash');
 const shelljs = require('shelljs');
 const pluralize = require('pluralize');
-const jhiCore = require('simlife-core');
+const simCore = require('simlife-core');
 const prompts = require('./prompts');
 const BaseGenerator = require('../generator-base');
 const constants = require('../generator-constants');
@@ -222,7 +222,7 @@ module.exports = class extends BaseGenerator {
                     this.error(chalk.red('The entity name cannot be empty'));
                 } else if (entityName.indexOf('Detail', entityName.length - 'Detail'.length) !== -1) {
                     this.error(chalk.red('The entity name cannot end with \'Detail\''));
-                } else if (!this.context.skipServer && jhiCore.isReservedClassName(entityName)) {
+                } else if (!this.context.skipServer && simCore.isReservedClassName(entityName)) {
                     this.error(chalk.red('The entity name cannot contain a Java or Simlife reserved keyword'));
                 }
             },
@@ -261,7 +261,7 @@ module.exports = class extends BaseGenerator {
                     this.error(chalk.red(`The table name cannot contain special characters.\n${instructions}`));
                 } else if (entityTableName === '') {
                     this.error(chalk.red('The table name cannot be empty'));
-                } else if (jhiCore.isReservedTableName(entityTableName, prodDatabaseType)) {
+                } else if (simCore.isReservedTableName(entityTableName, prodDatabaseType)) {
                     this.warning(chalk.red(`The table name cannot contain the '${entityTableName.toUpperCase()}' reserved keyword, so it will be prefixed with '${simTablePrefix}_'.\n${instructions}`));
                     context.entityTableName = `${simTablePrefix}_${entityTableName}`;
                 } else if (prodDatabaseType === 'oracle' && entityTableName.length > 26 && !skipCheckLengthOfIdentifier) {
@@ -546,9 +546,9 @@ module.exports = class extends BaseGenerator {
 
                     if (_.isUndefined(field.fieldNameAsDatabaseColumn)) {
                         const fieldNameUnderscored = _.snakeCase(field.fieldName);
-                        const jhiFieldNamePrefix = this.getColumnName(context.simPrefix);
-                        if (jhiCore.isReservedTableName(fieldNameUnderscored, context.databaseType)) {
-                            field.fieldNameAsDatabaseColumn = `${jhiFieldNamePrefix}_${fieldNameUnderscored}`;
+                        const simFieldNamePrefix = this.getColumnName(context.simPrefix);
+                        if (simCore.isReservedTableName(fieldNameUnderscored, context.databaseType)) {
+                            field.fieldNameAsDatabaseColumn = `${simFieldNamePrefix}_${fieldNameUnderscored}`;
                         } else {
                             field.fieldNameAsDatabaseColumn = fieldNameUnderscored;
                         }
@@ -673,7 +673,7 @@ module.exports = class extends BaseGenerator {
                         if (!relationship.otherEntityTableName) {
                             relationship.otherEntityTableName = this.getTableName(otherEntityName);
                         }
-                        if (jhiCore.isReservedTableName(relationship.otherEntityTableName, context.prodDatabaseType)) {
+                        if (simCore.isReservedTableName(relationship.otherEntityTableName, context.prodDatabaseType)) {
                             const otherEntityTableName = relationship.otherEntityTableName;
                             relationship.otherEntityTableName = `${simTablePrefix}_${otherEntityTableName}`;
                         }

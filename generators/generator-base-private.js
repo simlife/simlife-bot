@@ -28,7 +28,7 @@ const shelljs = require('shelljs');
 const semver = require('semver');
 const exec = require('child_process').exec;
 const https = require('https');
-const jhiCore = require('simlife-core');
+const simCore = require('simlife-core');
 const filter = require('gulp-filter');
 
 const packagejs = require('../package.json');
@@ -1035,12 +1035,12 @@ module.exports = class extends Generator {
      * @returns generated JDL from entities
      */
     generateJDLFromEntities() {
-        const jdl = new jhiCore.JDLObject();
+        const jdl = new simCore.JDLObject();
         try {
             const entities = {};
             this.getExistingEntities().forEach((entity) => { entities[entity.name] = entity.definition; });
-            jhiCore.convertJsonEntitiesToJDL(entities, jdl);
-            jhiCore.convertJsonServerOptionsToJDL({ 'simlife-bot': this.config.getAll() }, jdl);
+            simCore.convertJsonEntitiesToJDL(entities, jdl);
+            simCore.convertJsonServerOptionsToJDL({ 'simlife-bot': this.config.getAll() }, jdl);
         } catch (e) {
             this.log(e.message || e);
             this.error('\nError while parsing entities to JDL\n');
@@ -1217,12 +1217,12 @@ module.exports = class extends Generator {
      */
     createConfigFromNewConfFile(generator = this) {
         const storePath = path.join(generator.destinationRoot(), '.yo-rc.json');
-        if (!jhiCore.FileUtils.doesFileExist(storePath)) {
+        if (!simCore.FileUtils.doesFileExist(storePath)) {
             return;
         }
         const customFs = this.fs;
         customFs.readJSON = (filePath) => {
-            if (!jhiCore.FileUtils.doesFileExist(filePath)) {
+            if (!simCore.FileUtils.doesFileExist(filePath)) {
                 return {};
             }
             return JSON.parse(fs.readFileSync(filePath, { encoding: 'utf-8' }));

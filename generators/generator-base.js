@@ -26,14 +26,14 @@ const semver = require('semver');
 const exec = require('child_process').exec;
 const os = require('os');
 const pluralize = require('pluralize');
-const jhiCore = require('simlife-core');
+const simCore = require('simlife-core');
 const packagejs = require('../package.json');
 const simlifeUtils = require('./utils');
 const constants = require('./generator-constants');
 const PrivateBase = require('./generator-base-private');
 
 const SIMLIFE_CONFIG_DIR = '.simlife';
-const MODULES_HOOK_FILE = `${SIMLIFE_CONFIG_DIR}/modules/jhi-hooks.json`;
+const MODULES_HOOK_FILE = `${SIMLIFE_CONFIG_DIR}/modules/sim-hooks.json`;
 const GENERATOR_SIMLIFE = 'simlife-bot';
 
 const CLIENT_MAIN_SRC_DIR = constants.CLIENT_MAIN_SRC_DIR;
@@ -1469,10 +1469,10 @@ module.exports = class extends PrivateBase {
         case 'stripJs':
             regex = new RegExp([
                 /(,[\s]*(resolve):[\s]*[{][\s]*(translatePartialLoader)['a-zA-Z0-9$,(){.<%=\->;\s:[\]]*(;[\s]*\}\][\s]*\}))/, // ng1 resolve block
-                /([\s]import\s\{\s?JhiLanguageService\s?\}\sfrom\s["|']ng-simlife["|'];)/, // ng2 import jhiLanguageService
-                /(,?\s?JhiLanguageService,?\s?)/, // ng2 import jhiLanguageService
-                /(private\s[a-zA-Z0-9]*(L|l)anguageService\s?:\s?JhiLanguageService\s?,*[\s]*)/, // ng2 jhiLanguageService constructor argument
-                /(this\.[a-zA-Z0-9]*(L|l)anguageService\.setLocations\(\[['"a-zA-Z0-9\-_,\s]+\]\);[\s]*)/, // jhiLanguageService invocations
+                /([\s]import\s\{\s?SimLanguageService\s?\}\sfrom\s["|']ng-simlife["|'];)/, // ng2 import simLanguageService
+                /(,?\s?SimLanguageService,?\s?)/, // ng2 import simLanguageService
+                /(private\s[a-zA-Z0-9]*(L|l)anguageService\s?:\s?SimLanguageService\s?,*[\s]*)/, // ng2 simLanguageService constructor argument
+                /(this\.[a-zA-Z0-9]*(L|l)anguageService\.setLocations\(\[['"a-zA-Z0-9\-_,\s]+\]\);[\s]*)/, // simLanguageService invocations
             ].map(r => r.source).join('|'), 'g');
 
             simlifeUtils.copyWebResource(source, dest, regex, 'js', _this, opt, template);
@@ -1580,7 +1580,7 @@ module.exports = class extends PrivateBase {
     }
 
     /**
-     * Register a module configuration to .simlife/modules/jhi-hooks.json
+     * Register a module configuration to .simlife/modules/sim-hooks.json
      *
      * @param {string} npmPackageName - npm package name of the generator
      * @param {string} hookFor - from which Simlife generator this should be hooked ( 'entity' or 'app')
@@ -1754,7 +1754,7 @@ module.exports = class extends PrivateBase {
             this.warning(`entityTableName is missing in .simlife/${context.name}.json, using entity name as fallback`);
             context.entityTableName = this.getTableName(context.name);
         }
-        if (jhiCore.isReservedTableName(context.entityTableName, context.prodDatabaseType)) {
+        if (simCore.isReservedTableName(context.entityTableName, context.prodDatabaseType)) {
             context.entityTableName = `${context.simTablePrefix}_${context.entityTableName}`;
         }
         context.fields.forEach((field) => {
@@ -1815,7 +1815,7 @@ module.exports = class extends PrivateBase {
 
         return shelljs.ls(path.join(SIMLIFE_CONFIG_DIR, '*.json')).reduce((acc, file) => {
             try {
-                const definition = jhiCore.readEntityJSON(file);
+                const definition = simCore.readEntityJSON(file);
                 acc.push({ name: path.basename(file, '.json'), definition });
             } catch (error) {
                 // not an entity file / malformed?
@@ -2447,7 +2447,7 @@ module.exports = class extends PrivateBase {
      */
     getAllSimlifeConfig(generator = this, force) {
         let configuration = generator.config.getAll() || {};
-        if ((force || !configuration.baseName) && jhiCore.FileUtils.doesFileExist('.yo-rc.json')) {
+        if ((force || !configuration.baseName) && simCore.FileUtils.doesFileExist('.yo-rc.json')) {
             configuration = JSON.parse(fs.readFileSync('.yo-rc.json', { encoding: 'utf-8' }))['simlife-bot'];
         }
         if (!configuration.get || typeof configuration.get !== 'function') {

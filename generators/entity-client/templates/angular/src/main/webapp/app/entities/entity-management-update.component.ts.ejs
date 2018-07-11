@@ -31,7 +31,7 @@ import * as moment from 'moment';
 import { DATE_TIME_FORMAT } from 'app/shared/constants/input.constants';
 <%_ } _%>
 <%_ if (queries && queries.length > 0 || fieldsContainBlob) { _%>
-import { <% if (queries && queries.length > 0) { %>JhiAlertService, <% } %><% if (fieldsContainBlob) { %>JhiDataUtils<% } %> } from 'ng-simlife';
+import { <% if (queries && queries.length > 0) { %>SimAlertService, <% } %><% if (fieldsContainBlob) { %>SimDataUtils<% } %> } from 'ng-simlife';
 <%_ } _%>
 
 import { I<%= entityAngularName %> } from 'app/shared/model/<%= entityModelFileName %>.model';
@@ -84,10 +84,10 @@ export class <%= entityAngularName %>UpdateComponent implements OnInit {
 
     constructor(
         <%_ if (fieldsContainBlob) { _%>
-        private dataUtils: JhiDataUtils,
+        private dataUtils: SimDataUtils,
         <%_ } _%>
         <%_ if (queries && queries.length > 0) { _%>
-        private jhiAlertService: JhiAlertService,
+        private simAlertService: SimAlertService,
         <%_ } _%>
         private <%= entityInstance %>Service: <%= entityAngularName %>Service,
         <%_ Object.keys(differentRelationships).forEach(key => {
@@ -174,7 +174,7 @@ export class <%= entityAngularName %>UpdateComponent implements OnInit {
     <%_ if (queries && queries.length > 0) { _%>
 
     private onError(errorMessage: string) {
-        this.jhiAlertService.error(errorMessage, null, null);
+        this.simAlertService.error(errorMessage, null, null);
     }
     <%_ } _%>
     <%_

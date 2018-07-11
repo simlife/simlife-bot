@@ -38,15 +38,15 @@
 
     constructor(
         private <%= entityInstance %>Service: <%= entityAngularName %>Service,
-        private parseLinks: JhiParseLinks,
-        private jhiAlertService: JhiAlertService,
+        private parseLinks: SimParseLinks,
+        private simAlertService: SimAlertService,
         private principal: Principal,
         private activatedRoute: ActivatedRoute,
         <%_ if (fieldsContainBlob) { _%>
-        private dataUtils: JhiDataUtils,
+        private dataUtils: SimDataUtils,
         <%_ } _%>
         private router: Router,
-        private eventManager: JhiEventManager
+        private eventManager: SimEventManager
     ) {
         <%_ if (databaseType !== 'cassandra') { _%>
         this.itemsPerPage = ITEMS_PER_PAGE;

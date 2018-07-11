@@ -18,7 +18,7 @@
 -%>
 import { Injectable } from '@angular/core';
 import { Resolve, ActivatedRouteSnapshot, RouterStateSnapshot, Routes, CanActivate } from '@angular/router';
-import { JhiPaginationUtil, JhiResolvePagingParams } from 'ng-simlife';
+import { SimPaginationUtil, SimResolvePagingParams } from 'ng-simlife';
 
 import { Principal, User, UserService } from 'app/core';
 import { UserMgmtComponent } from './user-management.component';
@@ -55,7 +55,7 @@ export const userMgmtRoute: Routes = [
         path: 'user-management',
         component: UserMgmtComponent,
         resolve: {
-            'pagingParams': JhiResolvePagingParams
+            'pagingParams': SimResolvePagingParams
         },
         data: {
             pageTitle: 'userManagement.home.title',

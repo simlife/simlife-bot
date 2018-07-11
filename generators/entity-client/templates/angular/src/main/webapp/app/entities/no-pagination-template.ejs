@@ -25,11 +25,11 @@
 
     constructor(
         private <%= entityInstance %>Service: <%= entityAngularName %>Service,
-        private jhiAlertService: JhiAlertService,
+        private simAlertService: SimAlertService,
         <%_ if (fieldsContainBlob) { _%>
-        private dataUtils: JhiDataUtils,
+        private dataUtils: SimDataUtils,
         <%_ } _%>
-        private eventManager: JhiEventManager,
+        private eventManager: SimEventManager,
         <%_ if (searchEngine === 'elasticsearch') { _%>
         private activatedRoute: ActivatedRoute,
         <%_ } _%>

@@ -21,10 +21,10 @@ import { Router } from '@angular/router';
 <%_ if (authenticationType !== 'oauth2') { _%>
 import { NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 <%_ } _%>
-import { JhiLanguageService } from 'ng-simlife';
+import { SimLanguageService } from 'ng-simlife';
 
 import { VERSION } from 'app/app.constants';
-import { <% if (enableTranslation) { %>JhiLanguageHelper, <% } %>Principal, <% if (authenticationType !== 'oauth2') { %>LoginModalService, <% } %>LoginService } from 'app/core';
+import { <% if (enableTranslation) { %>SimLanguageHelper, <% } %>Principal, <% if (authenticationType !== 'oauth2') { %>LoginModalService, <% } %>LoginService } from 'app/core';
 import { ProfileService } from '../profiles/profile.service';
 
 @Component({
@@ -51,8 +51,8 @@ export class NavbarComponent implements OnInit {
     constructor(
         private loginService: LoginService,
         <%_ if (enableTranslation) { _%>
-        private languageService: JhiLanguageService,
-        private languageHelper: JhiLanguageHelper,
+        private languageService: SimLanguageService,
+        private languageHelper: SimLanguageHelper,
         <%_ } _%>
         private principal: Principal,
         <%_ if (authenticationType !== 'oauth2') { _%>

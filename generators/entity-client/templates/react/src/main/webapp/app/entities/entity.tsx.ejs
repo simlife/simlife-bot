@@ -39,7 +39,7 @@ import {
   <%_ if (pagination !== 'no') { _%>
   , getSortState, IPaginationBaseState
   <%_ if (pagination === 'pagination' || pagination === 'pager') { _%>
-  , getPaginationItemsNumber, JhiPagination
+  , getPaginationItemsNumber, SimPagination
   <%_ }} _%>
 } from 'react-simlife';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -341,7 +341,7 @@ export class <%= entityReactName %> extends React.Component<I<%= entityReactName
         </div>
         <%_ if (pagination === 'pagination' || pagination === 'pager') { _%>
         <Row className="justify-content-center">
-          <JhiPagination
+          <SimPagination
             items={getPaginationItemsNumber(totalItems, this.state.itemsPerPage)}
             activePage={this.state.activePage}
             onSelect={this.handlePagination}
